@@ -16,10 +16,10 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Value("${application.security.jwt.secret-key}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${application.security.jwt.expiration}")
+    @Value("${jwt.expiration}")
     private long jwtExpiration;
 
 
@@ -94,7 +94,7 @@ public class JwtService {
                 // Retourne le payload (les claims)
                 .getPayload();
     }
-    @Value("${application.security.jwt.refresh-token-expiration}")
+    @Value("${jwt.refreshExpiration}")
     private long refreshExpiration;
 
     // Génère un refresh token (même logique, durée plus longue)

@@ -40,10 +40,10 @@ public class AuthenticationService {
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
 
-    @Value("${application.mail.from}")
+    @Value("${application.mail.from: no-reply@example.com}")
     private String from;
 
-    @Value("${application.mailing.frontend.activation-url}")
+    @Value("${application.mailing.frontend.activation-url: http://localhost:4200/activate}")
     private String activationUrl;
 
     // ═══════════════════════════════════════════════════════════════
