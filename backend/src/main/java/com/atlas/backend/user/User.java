@@ -51,7 +51,7 @@ public class User extends Listeners implements Principal, UserDetails {
      * Fuseau horaire IANA (ex: "Africa/Abidjan", "Africa/Dakar", "Africa/Lagos")
      * CRITIQUE pour les rendez-vous — un meeting à 10h Dakar ≠ 10h Paris
      */
-    @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'Africa/Abidjan'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     @Builder.Default
     private String timezone = "Africa/Abidjan";
 
@@ -59,7 +59,7 @@ public class User extends Listeners implements Principal, UserDetails {
      * Langue préférée (ex: "fr", "en")
      * Pour les emails transactionnels et l'interface
      */
-    @Column(nullable = false, columnDefinition = "VARCHAR(5) DEFAULT 'fr'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(5)")
     @Builder.Default
     private String preferredLanguage = "fr";
 

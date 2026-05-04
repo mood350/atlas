@@ -76,7 +76,7 @@ public class Agency extends Listeners {
 
     // ─── Paramètres de facturation ────────────────────────────────────────────
     /** Devise utilisée (ex: "XOF", "XAF", "EUR", "USD") */
-    @Column(nullable = false, columnDefinition = "VARCHAR(3) DEFAULT 'XOF'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(3)")
     @Builder.Default
     private String currency = "XOF";
 
