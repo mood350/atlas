@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.springframework.lang.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class EmailService {
     private JavaMailSender mailSender; // optional
     private final SpringTemplateEngine templateEngine;
 
-    public EmailService(SpringTemplateEngine templateEngine, org.springframework.beans.factory.annotation.Autowired(required = false) JavaMailSender mailSender) {
+    public EmailService(SpringTemplateEngine templateEngine, @org.springframework.lang.Nullable JavaMailSender mailSender) {
         this.templateEngine = templateEngine;
         this.mailSender = mailSender;
     }

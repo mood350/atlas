@@ -2,38 +2,29 @@ package com.atlas.backend.email;
 
 import lombok.Getter;
 
-/**
- * Noms des templates Thymeleaf pour les emails transactionnels.
- *
- * Chaque valeur correspond à un fichier dans :
- *   src/main/resources/templates/emails/<name>.html
- */
 @Getter
 public enum EmailTemplateName {
 
-    /** Email envoyé à l'inscription pour activer le compte */
     ACTIVATE_ACCOUNT("activate_account"),
-
-    /** Email de bienvenue après activation du compte */
     WELCOME("welcome"),
-
-    /** Email de réinitialisation du mot de passe */
     RESET_PASSWORD("reset_password"),
-
-    /** Email de notification de connexion depuis un nouvel appareil */
     NEW_DEVICE_LOGIN("new_device_login"),
-
-    /**
-     * Email d'invitation à rejoindre une agence.
-     * Variables : agencyName, inviteUrl, role
-     */
     INVITATION("invitation"),
+    EMAIL_CHANGE_CONFIRM("email_change_confirm"),
 
     /**
-     * Email de confirmation de changement d'adresse email.
-     * Envoyé à la NOUVELLE adresse.
+     * Rappel envoyé au responsable d'un deal inactif.
+     * Variables : ownerName, dealTitle, clientName, stageName,
+     *             amount, currency, inactiveDays, dealUrl
      */
-    EMAIL_CHANGE_CONFIRM("email_change_confirm");
+    DEAL_INACTIVITY_REMINDER("deal_inactivity_reminder"),
+
+    /**
+     * Escalade envoyée au propriétaire de l'agence après N relances sans réponse.
+     * Variables : ownerName, dealTitle, clientName, responsibleName,
+     *             remindersSent, inactiveDays, dealUrl
+     */
+    DEAL_ESCALATION_ALERT("deal_escalation_alert");
 
     private final String name;
 
