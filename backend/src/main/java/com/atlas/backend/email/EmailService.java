@@ -2,7 +2,7 @@ package com.atlas.backend.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -25,12 +25,16 @@ import java.util.Map;
  * recevoir la réponse de l'API. ✅
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private JavaMailSender mailSender; // optional
     private final SpringTemplateEngine templateEngine;
+
+    public EmailService(SpringTemplateEngine templateEngine, org.springframework.beans.factory.annotation.Autowired(required = false) JavaMailSender mailSender) {
+        this.templateEngine = templateEngine;
+        this.mailSender = mailSender;
+    }
 
     /**
      * Méthode générique d'envoi d'email HTML.
@@ -49,6 +53,12 @@ public class EmailService {
             Map<String, Object> properties,
             String from
     ) throws MessagingException {
+
+        if (this.mailSender == null) {
+            // En environnement sans SMTP configuré (ex: CI local), on log et on ne bloque pas l'application.
+            log.warn("SMTP non configuré - email vers {} ignoré (sujet: {})", to, subject);
+            return;
+        }
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(

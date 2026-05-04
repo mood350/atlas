@@ -181,6 +181,22 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- Enforce JDK toolchain for CI/consistency -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<toolchains>
+						<jdk>
+							<version>21</version>
+							<vendor>any</vendor>
+						</jdk>
+					</toolchains>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
