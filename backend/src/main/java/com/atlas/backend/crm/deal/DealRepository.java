@@ -26,16 +26,11 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
     Page<Deal> findByAgencyIdAndClientId(Long agencyId, Long clientId, Pageable pageable);
 
     // ─── DÉTECTION D'INACTIVITÉ (utilisée par le job Redis) ──────────────────
-    /**
-     * Retourne tous les deals OPEN dont lastActivityAt est avant le seuil
-     * ET dont le nombre de rappels déjà envoyés est inférieur à maxReminders.
-     *
-     * Appelé toutes les heures par DealInactivityScheduler.
-     */
+
     @Query("""
         SELECT d FROM Deal d
         WHERE d.agency.id = :agencyId
-          AND d.status = 'OPEN'
+          AND d.status = com.atlas.backend.crm.deal.Deal.DealStatus.OPEN
           AND d.lastActivityAt < :threshold
           AND d.remindersSent < :maxReminders
         ORDER BY d.lastActivityAt ASC
@@ -46,13 +41,9 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
             @Param("maxReminders") int maxReminders
     );
 
-    /**
-     * Version globale (tous tenants) — appelée par le scheduler global.
-     * Le scheduler itère ensuite agence par agence.
-     */
     @Query("""
         SELECT d FROM Deal d
-        WHERE d.status = 'OPEN'
+        WHERE d.status = com.atlas.backend.crm.deal.Deal.DealStatus.OPEN
           AND d.lastActivityAt < :threshold
           AND d.remindersSent < :maxReminders
         """)
@@ -70,7 +61,7 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
         SELECT COALESCE(SUM(d.amount), 0)
         FROM Deal d
         WHERE d.agency.id = :agencyId
-          AND d.status = 'WON'
+          AND d.status = com.atlas.backend.crm.deal.Deal.DealStatus.WON
         """)
     BigDecimal sumWonAmountByAgency(@Param("agencyId") Long agencyId);
 
@@ -79,7 +70,7 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
         SELECT COALESCE(SUM(d.weightedAmount), 0)
         FROM Deal d
         WHERE d.agency.id = :agencyId
-          AND d.status = 'OPEN'
+          AND d.status = com.atlas.backend.crm.deal.Deal.DealStatus.OPEN
         """)
     BigDecimal sumWeightedAmountByAgency(@Param("agencyId") Long agencyId);
 
@@ -88,7 +79,7 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
         SELECT d.stage.id, COUNT(d), COALESCE(SUM(d.amount), 0)
         FROM Deal d
         WHERE d.agency.id = :agencyId
-          AND d.status = 'OPEN'
+          AND d.status = com.atlas.backend.crm.deal.Deal.DealStatus.OPEN
         GROUP BY d.stage.id
         """)
     List<Object[]> countAndSumByStage(@Param("agencyId") Long agencyId);
@@ -96,20 +87,23 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
     /** Taux de conversion = deals gagnés / (deals gagnés + deals perdus) */
     @Query("""
         SELECT
-          COUNT(CASE WHEN d.status = 'WON'  THEN 1 END) * 100.0 /
-          NULLIF(COUNT(CASE WHEN d.status IN ('WON','LOST') THEN 1 END), 0)
+          COUNT(CASE WHEN d.status = com.atlas.backend.crm.deal.Deal.DealStatus.WON  THEN 1 END) * 100.0 /
+          NULLIF(COUNT(CASE WHEN d.status IN (
+              com.atlas.backend.crm.deal.Deal.DealStatus.WON,
+              com.atlas.backend.crm.deal.Deal.DealStatus.LOST
+          ) THEN 1 END), 0)
         FROM Deal d
         WHERE d.agency.id = :agencyId
         """)
     Double conversionRate(@Param("agencyId") Long agencyId);
 
     /** Durée moyenne du cycle de vente en jours (deals gagnés uniquement) */
-    @Query("""
-        SELECT AVG(DATEDIFF(d.actualCloseDate, d.createdDate))
-        FROM Deal d
-        WHERE d.agency.id = :agencyId
-          AND d.status = 'WON'
-          AND d.actualCloseDate IS NOT NULL
-        """)
+    @Query(value = """
+        SELECT AVG(actual_close_date - DATE(created_at))
+        FROM deal
+        WHERE agency_id = :agencyId
+          AND status = 'WON'
+          AND actual_close_date IS NOT NULL
+        """, nativeQuery = true)
     Double avgSalesCycleDays(@Param("agencyId") Long agencyId);
 }
