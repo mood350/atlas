@@ -20,7 +20,22 @@ public enum EmailTemplateName {
 
     // Variables : agencyMemberName, clientName, quoteNumber, quoteTitle,
     //             totalAmount, currency, accepted (boolean), rejectionReason, quoteUrl
-    QUOTE_RESPONSE("quote_response");
+    QUOTE_RESPONSE("quote_response"),
+
+    // Variables : clientName, agencyName, contractNumber, contractTitle, validUntil, portalUrl
+    CONTRACT_SENT("contract_sent"),
+
+    // Variables : agencyMemberName, clientName, contractNumber, signerName, signedAt, signatureHash
+    CONTRACT_SIGNED("contract_signed"),
+
+    // Variables : clientName, agencyName, invoiceNumber, totalAmount, currency, dueDate, portalUrl
+    INVOICE_SENT("invoice_sent"),
+
+    // Variables : clientName, invoiceNumber, totalAmount, dueDate, daysOverdue, portalUrl
+    INVOICE_REMINDER("invoice_reminder"),
+
+    // Variables : clientName, invoiceNumber, paidAmount, currency, remainingAmount, paidAt
+    PAYMENT_CONFIRMED("payment_confirmed");
 
     private final String name;
 

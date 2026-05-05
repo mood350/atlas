@@ -56,8 +56,10 @@ public class SecurityConfig {
             "/swagger-ui.html",
             // Webhooks paiement (FedaPay, PayDunya) — non authentifiés mais sécurisés par HMAC
             "/api/webhooks/payment/**",
-            // Portail client (accès par token unique)
-            "/api/client-portal/**"
+            // Portail client (acces par token unique)
+            "/api/client-portal/**",
+            "/api/portal/contracts/**",
+            "/api/portal/invoices/**"
     };
 
     @Bean
