@@ -11,20 +11,16 @@ public enum EmailTemplateName {
     NEW_DEVICE_LOGIN("new_device_login"),
     INVITATION("invitation"),
     EMAIL_CHANGE_CONFIRM("email_change_confirm"),
-
-    /**
-     * Rappel envoyé au responsable d'un deal inactif.
-     * Variables : ownerName, dealTitle, clientName, stageName,
-     *             amount, currency, inactiveDays, dealUrl
-     */
     DEAL_INACTIVITY_REMINDER("deal_inactivity_reminder"),
+    DEAL_ESCALATION_ALERT("deal_escalation_alert"),
 
-    /**
-     * Escalade envoyée au propriétaire de l'agence après N relances sans réponse.
-     * Variables : ownerName, dealTitle, clientName, responsibleName,
-     *             remindersSent, inactiveDays, dealUrl
-     */
-    DEAL_ESCALATION_ALERT("deal_escalation_alert");
+    // Variables : clientName, agencyName, quoteNumber, quoteTitle,
+    //             totalAmount, currency, validUntil, portalUrl
+    QUOTE_SENT("quote_sent"),
+
+    // Variables : agencyMemberName, clientName, quoteNumber, quoteTitle,
+    //             totalAmount, currency, accepted (boolean), rejectionReason, quoteUrl
+    QUOTE_RESPONSE("quote_response");
 
     private final String name;
 
