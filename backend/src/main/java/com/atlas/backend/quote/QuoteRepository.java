@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,4 +50,22 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
     @Query("SELECT q FROM Quote q WHERE q.status IN ('SENT', 'VIEWED') AND q.validUntil < :today")
     List<Quote> findExpiredQuotes(@Param("today") LocalDate today);
+
+    // ─── Analytics ────────────────────────────────────────────────────────────
+
+    @Query("""
+        SELECT COUNT(q) FROM Quote q
+        WHERE q.agency.id = :agencyId
+          AND q.status IN ('SENT','VIEWED','ACCEPTED','REJECTED','EXPIRED','INVOICED')
+          AND q.sentAt >= :from
+        """)
+    long countSentSince(@Param("agencyId") Long agencyId, @Param("from") LocalDateTime from);
+
+    @Query("""
+        SELECT COUNT(q) FROM Quote q
+        WHERE q.agency.id = :agencyId
+          AND q.status = 'ACCEPTED'
+          AND q.respondedAt >= :from
+        """)
+    long countAcceptedSince(@Param("agencyId") Long agencyId, @Param("from") LocalDateTime from);
 }

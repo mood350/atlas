@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +37,15 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findProjectsDeadlineSoon(@Param("agencyId") Long agencyId,
                                            @Param("today") LocalDate today,
                                            @Param("soon") LocalDate soon);
+
+    // ─── Analytics ────────────────────────────────────────────────────────────
+
+    @Query("SELECT COALESCE(SUM(p.loggedHours), 0) FROM Project p WHERE p.agency.id = :agencyId AND p.status NOT IN ('DONE', 'CANCELLED')")
+    BigDecimal sumLoggedHoursActive(@Param("agencyId") Long agencyId);
+
+    @Query("SELECT COALESCE(SUM(p.estimatedHours), 0) FROM Project p WHERE p.agency.id = :agencyId AND p.status NOT IN ('DONE', 'CANCELLED')")
+    BigDecimal sumEstimatedHoursActive(@Param("agencyId") Long agencyId);
+
+    @Query("SELECT COALESCE(SUM(p.budget), 0) FROM Project p WHERE p.agency.id = :agencyId")
+    BigDecimal sumBudgetByAgency(@Param("agencyId") Long agencyId);
 }

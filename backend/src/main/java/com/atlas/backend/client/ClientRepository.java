@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,4 +57,28 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
         GROUP BY c.type
         """)
     List<Object[]> countByTypeForAgency(@Param("agencyId") Long agencyId);
+
+    // ─── Analytics ────────────────────────────────────────────────────────────
+
+    @Query("""
+        SELECT c.leadSource, COUNT(c)
+        FROM Client c
+        WHERE c.agency.id = :agencyId
+        GROUP BY c.leadSource
+        """)
+    List<Object[]> countByLeadSourceForAgency(@Param("agencyId") Long agencyId);
+
+    @Query(value = """
+        SELECT c.id, c.name, COALESCE(SUM(i.total_amount), 0) AS revenue
+        FROM client c
+        LEFT JOIN invoice i ON i.client_id = c.id
+          AND i.status = 'PAID' AND i.paid_at >= :from
+        WHERE c.agency_id = :agencyId
+        GROUP BY c.id, c.name
+        ORDER BY revenue DESC
+        LIMIT :limitCount
+        """, nativeQuery = true)
+    List<Object[]> topClientsByRevenue(@Param("agencyId") Long agencyId,
+                                       @Param("from") LocalDateTime from,
+                                       @Param("limitCount") int limitCount);
 }
