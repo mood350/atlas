@@ -35,7 +35,19 @@ public enum EmailTemplateName {
     INVOICE_REMINDER("invoice_reminder"),
 
     // Variables : clientName, invoiceNumber, paidAmount, currency, remainingAmount, paidAt
-    PAYMENT_CONFIRMED("payment_confirmed");
+    PAYMENT_CONFIRMED("payment_confirmed"),
+
+    // Variables : guestName, memberName, startTime, meetingUrl, accessToken
+    APPOINTMENT_CONFIRMATION("appointment_confirmation"),
+
+    // Variables : memberName, guestName, guestEmail, startTime, type
+    APPOINTMENT_NEW_BOOKING("appointment_new_booking"),
+
+    // Variables : guestName, memberName, startTime, meetingUrl, reminderType
+    APPOINTMENT_REMINDER("appointment_reminder"),
+
+    // Variables : guestName, memberName, startTime, reason
+    APPOINTMENT_CANCELLED("appointment_cancelled");
 
     private final String name;
 

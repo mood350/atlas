@@ -59,7 +59,11 @@ public class SecurityConfig {
             // Portail client (acces par token unique)
             "/api/client-portal/**",
             "/api/portal/contracts/**",
-            "/api/portal/invoices/**"
+            "/api/portal/invoices/**",
+            // Booking public (page Calendly-like, sans authentification)
+            "/api/booking/**",
+            // Callback OAuth2 Google Calendar
+            "/api/calendar/oauth/callback"
     };
 
     @Bean

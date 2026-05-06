@@ -94,6 +94,10 @@ public class User extends Listeners implements Principal, UserDetails {
     private String lastKnownIp;
     private String lastKnownUserAgent;
 
+    // ─── Booking public ───────────────────────────────────────────────────────
+    /** Token OAuth2 refresh pour la synchronisation Google Calendar */
+    private String googleCalendarRefreshToken;
+
     // ─── Préférences de notifications ────────────────────────────────────────
     @Builder.Default
     private boolean emailNotificationsEnabled = true;
