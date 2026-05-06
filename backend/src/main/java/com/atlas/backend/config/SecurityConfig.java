@@ -56,6 +56,10 @@ public class SecurityConfig {
             "/swagger-ui.html",
             // Webhooks paiement (FedaPay, PayDunya) — non authentifiés mais sécurisés par HMAC
             "/api/webhooks/payment/**",
+            // Webhook Twilio — SMS et WhatsApp entrants
+            "/api/webhooks/twilio/**",
+            // WebSocket STOMP
+            "/ws/**",
             // Portail client (acces par token unique)
             "/api/client-portal/**",
             "/api/portal/contracts/**",
