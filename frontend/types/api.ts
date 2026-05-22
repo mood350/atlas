@@ -245,7 +245,7 @@ export interface QuoteStats {
   acceptanceRate: number;
 }
 
-export type ContractStatus = "DRAFT" | "SENT" | "SIGNED" | "EXPIRED" | "CANCELLED";
+export type ContractStatus = "DRAFT" | "SENT" | "SIGNED" | "CANCELLED";
 
 export interface ContractSummary {
   id: number;

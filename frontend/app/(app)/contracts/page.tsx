@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FileSignature, MoreHorizontal, Send, Trash2 } from "lucide-react";
+import { Download, FileSignature, MoreHorizontal, Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -29,11 +29,10 @@ import { cn } from "@/lib/utils";
 import type { ContractSummary, ContractStatus } from "@/types/api";
 
 const statusTabs: { value: ContractStatus | null; label: string }[] = [
-  { value: null,       label: "Tous" },
-  { value: "DRAFT",    label: "Brouillons" },
-  { value: "SENT",     label: "Envoyés" },
-  { value: "SIGNED",   label: "Signés" },
-  { value: "EXPIRED",  label: "Expirés" },
+  { value: null,        label: "Tous" },
+  { value: "DRAFT",     label: "Brouillons" },
+  { value: "SENT",      label: "Envoyés" },
+  { value: "SIGNED",    label: "Signés" },
   { value: "CANCELLED", label: "Annulés" },
 ];
 
@@ -217,6 +216,14 @@ export default function ContractsPage() {
             </button>
           ))}
         </div>
+
+        <button
+          onClick={() => router.push("/contracts/new")}
+          className="flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-background hover:opacity-90 transition-opacity active:scale-95"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Nouveau contrat
+        </button>
       </div>
 
       <DataTable

@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Download,
   Loader2,
+  Pencil,
   Send,
   Trash2,
   User,
@@ -102,7 +103,9 @@ export default function ContractDetailPage({
     );
   }
 
-  const canSend = contract.status === "DRAFT";
+  const canSend = contract.status !== "SIGNED" && contract.status !== "CANCELLED";
+  const isSentAlready = contract.status !== "DRAFT";
+  const canEdit = contract.status === "DRAFT";
   const canCancel = contract.status !== "CANCELLED" && contract.status !== "SIGNED";
 
   return (
@@ -133,6 +136,17 @@ export default function ContractDetailPage({
         </div>
 
         <div className="flex items-center gap-2">
+          {canEdit ? (
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/contracts/${contract.id}/edit`)}
+              className="rounded-full active:scale-95 transition-transform"
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Modifier
+            </Button>
+          ) : null}
+
           {canSend ? (
             <Button
               onClick={handleSend}
@@ -144,7 +158,7 @@ export default function ContractDetailPage({
               ) : (
                 <Send className="mr-2 h-4 w-4" />
               )}
-              Envoyer
+              {isSentAlready ? "Ré-envoyer" : "Envoyer"}
             </Button>
           ) : null}
 

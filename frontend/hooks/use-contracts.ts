@@ -10,6 +10,8 @@ import {
   listContracts,
   getContract,
   createContract,
+  updateContract,
+  convertFromQuote,
   sendContract,
   cancelContract,
   getContractStats,
@@ -52,6 +54,31 @@ export function useCreateContract() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateContractPayload) => createContract(agencyId!, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["contracts", agencyId] });
+      qc.invalidateQueries({ queryKey: ["contract-stats", agencyId] });
+    },
+  });
+}
+
+export function useUpdateContract() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ contractId, payload }: { contractId: number; payload: CreateContractPayload }) =>
+      updateContract(agencyId!, contractId, payload),
+    onSuccess: (contract) => {
+      qc.invalidateQueries({ queryKey: ["contracts", agencyId] });
+      qc.setQueryData(["contract", agencyId, contract.id], contract);
+    },
+  });
+}
+
+export function useConvertFromQuote() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (quoteId: number) => convertFromQuote(agencyId!, quoteId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["contracts", agencyId] });
       qc.invalidateQueries({ queryKey: ["contract-stats", agencyId] });

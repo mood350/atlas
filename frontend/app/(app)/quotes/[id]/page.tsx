@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Download,
+  FileSignature,
   Loader2,
   Send,
   Trash2,
@@ -24,6 +25,7 @@ import {
   useMarkQuoteAccepted,
   useMarkQuoteRejected,
 } from "@/hooks/use-quotes";
+import { useConvertFromQuote } from "@/hooks/use-contracts";
 import { requireAgencyId } from "@/hooks/use-agency";
 import { downloadQuotePdf } from "@/lib/api/quotes";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
@@ -61,6 +63,7 @@ export default function QuoteDetailPage({
   const markNegotiating   = useMarkQuoteNegotiating();
   const markAccepted      = useMarkQuoteAccepted();
   const markRejected      = useMarkQuoteRejected();
+  const convertToContract = useConvertFromQuote();
 
   async function handleSend() {
     if (!quote) return;
@@ -104,6 +107,18 @@ export default function QuoteDetailPage({
     try {
       await markAccepted.mutateAsync(quote.id);
       toast.success("Devis marqué comme accepté");
+    } catch (err) {
+      toast.error(extractErrorMessage(err));
+    }
+  }
+
+  async function handleConvertToContract() {
+    if (!quote) return;
+    if (!confirm(`Convertir le devis ${quote.quoteNumber} en contrat ?`)) return;
+    try {
+      const contract = await convertToContract.mutateAsync(quote.id);
+      toast.success("Contrat créé depuis ce devis");
+      router.push(`/contracts/${contract.id}`);
     } catch (err) {
       toast.error(extractErrorMessage(err));
     }
@@ -155,7 +170,7 @@ export default function QuoteDetailPage({
   const canSend = ["DRAFT", "SENT", "VIEWED", "NEGOTIATING", "REJECTED"].includes(quote.status);
   const isSentAlready = ["SENT", "VIEWED", "NEGOTIATING"].includes(quote.status);
   const canTransition = ["SENT", "VIEWED", "NEGOTIATING"].includes(quote.status);
-  const canEdit = quote.status === "DRAFT";
+  const canConvert = (quote.status === "ACCEPTED" || quote.status === "NEGOTIATING") && !quote.expired;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -223,6 +238,21 @@ export default function QuoteDetailPage({
                 Marquer refusé
               </Button>
             </>
+          ) : null}
+
+          {canConvert ? (
+            <Button
+              onClick={handleConvertToContract}
+              disabled={convertToContract.isPending}
+              className="rounded-full active:scale-95 transition-transform"
+            >
+              {convertToContract.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FileSignature className="mr-2 h-4 w-4" />
+              )}
+              Convertir en contrat
+            </Button>
           ) : null}
 
           {canSend ? (

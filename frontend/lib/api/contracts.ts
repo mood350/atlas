@@ -54,6 +54,18 @@ export async function convertFromQuote(
   return data;
 }
 
+export async function updateContract(
+  agencyId: number,
+  contractId: number,
+  payload: CreateContractPayload,
+): Promise<Contract> {
+  const { data } = await api.put<Contract>(
+    `/api/agencies/${agencyId}/contracts/${contractId}`,
+    payload,
+  );
+  return data;
+}
+
 export async function sendContract(agencyId: number, contractId: number): Promise<Contract> {
   const { data } = await api.post<Contract>(
     `/api/agencies/${agencyId}/contracts/${contractId}/send`,
