@@ -13,6 +13,7 @@ import {
   confirmAppointment,
   cancelAppointment,
   completeAppointment,
+  addMeetingNotes,
   deleteAppointment,
   getAppointmentStats,
   type AppointmentListParams,
@@ -102,6 +103,17 @@ export function useCompleteAppointment() {
       qc.invalidateQueries({ queryKey: ["appointments", agencyId] });
       qc.setQueryData(["appointment", agencyId, appt.id], appt);
       qc.invalidateQueries({ queryKey: ["appointment-stats", agencyId] });
+    },
+  });
+}
+
+export function useAddMeetingNotes(appointmentId: number) {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (notes: string) => addMeetingNotes(agencyId!, appointmentId, notes),
+    onSuccess: (appt) => {
+      qc.setQueryData(["appointment", agencyId, appt.id], appt);
     },
   });
 }

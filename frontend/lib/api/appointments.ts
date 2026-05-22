@@ -93,6 +93,18 @@ export async function completeAppointment(
   return data;
 }
 
+export async function addMeetingNotes(
+  agencyId: number,
+  appointmentId: number,
+  notes: string,
+): Promise<Appointment> {
+  const { data } = await api.patch<Appointment>(
+    `/api/agencies/${agencyId}/appointments/${appointmentId}/notes`,
+    { notes },
+  );
+  return data;
+}
+
 export async function deleteAppointment(
   agencyId: number,
   appointmentId: number,

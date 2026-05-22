@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   CheckCircle,
   Clock,
   ExternalLink,
   MoreHorizontal,
+  Plus,
   Trash2,
   Video,
 } from "lucide-react";
@@ -77,6 +79,7 @@ function StatCard({
 export default function AppointmentsPage() {
   usePageTitle("Rendez-vous", "Gérez vos réunions et appels clients");
 
+  const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | null>(null);
   const [page, setPage] = useState(0);
 
@@ -284,27 +287,37 @@ export default function AppointmentsPage() {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-1">
-        {statusTabs.map((tab) => (
-          <button
-            key={tab.label}
-            onClick={() => { setStatusFilter(tab.value); setPage(0); }}
-            className={cn(
-              "rounded-full px-3 py-1 text-[13px] font-medium transition-colors",
-              statusFilter === tab.value
-                ? "bg-foreground text-background"
-                : "text-foreground-muted hover:bg-background-muted hover:text-foreground",
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1">
+          {statusTabs.map((tab) => (
+            <button
+              key={tab.label}
+              onClick={() => { setStatusFilter(tab.value); setPage(0); }}
+              className={cn(
+                "rounded-full px-3 py-1 text-[13px] font-medium transition-colors",
+                statusFilter === tab.value
+                  ? "bg-foreground text-background"
+                  : "text-foreground-muted hover:bg-background-muted hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => router.push("/appointments/new")}
+          className="flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-background hover:opacity-90 transition-opacity active:scale-95"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Nouveau RDV
+        </button>
       </div>
 
       <DataTable
         columns={columns}
         rows={rows}
         rowKey={(appt) => appt.id}
+        onRowClick={(appt) => router.push(`/appointments/${appt.id}`)}
         isLoading={isLoading}
         isError={isError}
         empty={{
