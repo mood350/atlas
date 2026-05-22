@@ -58,6 +58,19 @@ export async function createInvoice(
   return data;
 }
 
+export async function generateDepositInvoice(
+  agencyId: number,
+  contractId: number,
+  percent: number,
+): Promise<Invoice> {
+  const { data } = await api.post<Invoice>(
+    `/api/agencies/${agencyId}/invoices/deposit/${contractId}`,
+    null,
+    { params: { percent } },
+  );
+  return data;
+}
+
 export async function generateFromContract(
   agencyId: number,
   contractId: number,

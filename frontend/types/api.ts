@@ -295,12 +295,12 @@ export interface ContractStats {
 export type InvoiceStatus =
   | "DRAFT"
   | "SENT"
-  | "PARTIAL"
+  | "PARTIALLY_PAID"
   | "PAID"
   | "OVERDUE"
   | "CANCELLED";
 
-export type InvoiceType = "STANDALONE" | "FROM_CONTRACT" | "DEPOSIT";
+export type InvoiceType = "STANDALONE" | "FROM_CONTRACT" | "DEPOSIT" | "FINAL";
 
 export interface InvoiceItem {
   id: number;

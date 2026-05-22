@@ -140,9 +140,10 @@ export default function InvoiceDetailPage({
     );
   }
 
-  const canSend = invoice.status === "DRAFT";
+  const canSend = invoice.status !== "PAID" && invoice.status !== "CANCELLED";
+  const isSentAlready = invoice.status !== "DRAFT";
   const canDelete = invoice.status === "DRAFT";
-  const canRecordPayment = invoice.status === "SENT" || invoice.status === "PARTIAL" || invoice.status === "OVERDUE";
+  const canRecordPayment = invoice.status === "SENT" || invoice.status === "PARTIALLY_PAID" || invoice.status === "OVERDUE";
   const isOverdue =
     invoice.dueDate &&
     invoice.status !== "PAID" &&
@@ -198,7 +199,7 @@ export default function InvoiceDetailPage({
               ) : (
                 <Send className="mr-2 h-4 w-4" />
               )}
-              Envoyer
+              {isSentAlready ? "Ré-envoyer" : "Envoyer"}
             </Button>
           ) : null}
 

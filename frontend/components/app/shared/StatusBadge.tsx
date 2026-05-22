@@ -53,7 +53,7 @@ const map: Record<AnyStatus, { label: string; className: string }> = {
   CANCELLED: { label: "Annulé", className: "bg-danger-bg text-danger" },
 
   // ─── Invoice ─────────────────────────────────────────────
-  PARTIAL: { label: "Partielle", className: "bg-warning-bg text-warning" },
+  PARTIALLY_PAID: { label: "Partielle", className: "bg-warning-bg text-warning" },
   PAID: { label: "Payée", className: "bg-success-bg text-success" },
   OVERDUE: { label: "En retard", className: "bg-danger-bg text-danger" },
 

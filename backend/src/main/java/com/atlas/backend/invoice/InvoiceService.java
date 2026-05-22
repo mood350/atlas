@@ -195,9 +195,10 @@ public class InvoiceService {
 
         Invoice invoice = getInvoiceSecure(agencyId, invoiceId);
 
-        if (invoice.getStatus() != Invoice.InvoiceStatus.DRAFT) {
+        if (invoice.getStatus() == Invoice.InvoiceStatus.PAID
+                || invoice.getStatus() == Invoice.InvoiceStatus.CANCELLED) {
             throw new IllegalStateException(
-                    "Seules les factures DRAFT peuvent etre envoyees. Statut: " + invoice.getStatus());
+                    "Impossible d'envoyer une facture au statut : " + invoice.getStatus());
         }
 
         invoicePdfService.generateInvoicePdf(invoice);
@@ -220,8 +221,10 @@ public class InvoiceService {
                 from
         );
 
-        invoice.setStatus(Invoice.InvoiceStatus.SENT);
-        invoice.setSentAt(LocalDateTime.now());
+        if (invoice.getStatus() == Invoice.InvoiceStatus.DRAFT) {
+            invoice.setStatus(Invoice.InvoiceStatus.SENT);
+            invoice.setSentAt(LocalDateTime.now());
+        }
         Invoice saved = invoiceRepository.save(invoice);
 
         log.info("[INVOICE] Facture envoyee invoice='{}' client='{}'",

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paiement confirmé</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+
+          <!-- Header — vert -->
+          <tr>
+            <td style="background:#16a34a;padding:28px 40px;">
+              <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.5px;">AtlasCRM</span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#16a34a;">Paiement confirmé ✓</h1>
+              <p style="margin:0 0 24px;font-size:15px;color:#71717a;">
+                Bonjour <strong th:text="${clientName}">Client</strong>,<br/>
+                Votre paiement a bien été enregistré. Merci !
+              </p>
+
+              <!-- Payment details -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;border-radius:10px;padding:20px;margin:0 0 28px;">
+                <tr>
+                  <td style="padding:6px 0;">
+                    <span style="font-size:13px;color:#71717a;">Facture</span><br/>
+                    <strong style="font-size:15px;color:#18181b;" th:text="${invoiceNumber}">FACT-2026-00001</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;">
+                    <span style="font-size:13px;color:#71717a;">Montant encaissé</span><br/>
+                    <strong style="font-size:22px;color:#16a34a;">
+                      <span th:text="${paidAmount}">0</span>
+                      <span th:text="${currency}">XOF</span>
+                    </strong>
+                  </td>
+                </tr>
+                <tr th:if="${remainingAmount != null and remainingAmount != '0'}">
+                  <td style="padding:6px 0;">
+                    <span style="font-size:13px;color:#71717a;">Reste à payer</span><br/>
+                    <strong style="font-size:15px;color:#18181b;">
+                      <span th:text="${remainingAmount}">0</span>
+                      <span th:text="${currency}">XOF</span>
+                    </strong>
+                  </td>
+                </tr>
+                <tr th:if="${paidAt != null and !#strings.isEmpty(paidAt)}">
+                  <td style="padding:6px 0;">
+                    <span style="font-size:13px;color:#71717a;">Date du paiement</span><br/>
+                    <strong style="font-size:15px;color:#18181b;" th:text="${paidAt}">—</strong>
+                  </td>
+                </tr>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #f4f4f5;margin:0 0 24px;"/>
+              <p style="margin:0;font-size:13px;color:#a1a1aa;">
+                Conservez cet email comme reçu de paiement. Pour toute question, contactez votre agence.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#fafafa;padding:20px 40px;border-top:1px solid #f4f4f5;">
+              <p style="margin:0;font-size:12px;color:#a1a1aa;text-align:center;">
+                © 2025 AtlasCRM · Plateforme CRM pour agences africaines
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

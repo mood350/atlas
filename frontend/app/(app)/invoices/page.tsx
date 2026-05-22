@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, MoreHorizontal, Receipt, Send, Trash2 } from "lucide-react";
+import { Download, MoreHorizontal, Plus, Receipt, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -32,7 +32,7 @@ const statusTabs: { value: InvoiceStatus | null; label: string }[] = [
   { value: null,       label: "Toutes" },
   { value: "DRAFT",    label: "Brouillons" },
   { value: "SENT",     label: "Envoyées" },
-  { value: "PARTIAL",  label: "Partielles" },
+  { value: "PARTIALLY_PAID", label: "Partielles" },
   { value: "PAID",     label: "Payées" },
   { value: "OVERDUE",  label: "En retard" },
 ];
@@ -239,6 +239,13 @@ export default function InvoicesPage() {
             </button>
           ))}
         </div>
+        <button
+          onClick={() => router.push("/invoices/new")}
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-background hover:opacity-90 transition-opacity"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Nouvelle facture
+        </button>
       </div>
 
       <DataTable
