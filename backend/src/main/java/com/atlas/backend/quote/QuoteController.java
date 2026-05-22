@@ -109,6 +109,38 @@ public class QuoteController {
         return ResponseEntity.noContent().build();
     }
 
+    // POST /api/agencies/{agencyId}/quotes/{quoteId}/mark-negotiating
+    @PostMapping("/api/agencies/{agencyId}/quotes/{quoteId}/mark-negotiating")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
+    public ResponseEntity<QuoteDto.Response> markNegotiating(
+            @PathVariable Long agencyId,
+            @PathVariable Long quoteId
+    ) {
+        return ResponseEntity.ok(quoteService.markAsNegotiating(agencyId, quoteId));
+    }
+
+    // POST /api/agencies/{agencyId}/quotes/{quoteId}/mark-accepted
+    @PostMapping("/api/agencies/{agencyId}/quotes/{quoteId}/mark-accepted")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
+    public ResponseEntity<QuoteDto.Response> markAccepted(
+            @PathVariable Long agencyId,
+            @PathVariable Long quoteId
+    ) throws Exception {
+        return ResponseEntity.ok(quoteService.markAsAccepted(agencyId, quoteId));
+    }
+
+    // POST /api/agencies/{agencyId}/quotes/{quoteId}/mark-rejected
+    @PostMapping("/api/agencies/{agencyId}/quotes/{quoteId}/mark-rejected")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
+    public ResponseEntity<QuoteDto.Response> markRejected(
+            @PathVariable Long agencyId,
+            @PathVariable Long quoteId,
+            @RequestBody(required = false) QuoteDto.RejectRequest request
+    ) throws Exception {
+        String reason = request != null ? request.getReason() : null;
+        return ResponseEntity.ok(quoteService.markAsRejected(agencyId, quoteId, reason));
+    }
+
     // GET /api/agencies/{agencyId}/quotes/stats
     @GetMapping("/api/agencies/{agencyId}/quotes/stats")
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")

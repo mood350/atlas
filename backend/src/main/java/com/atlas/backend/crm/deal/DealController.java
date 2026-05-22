@@ -68,13 +68,13 @@ public class DealController {
     public ResponseEntity<DealDto.Response> moveDeal(
             @PathVariable Long agencyId,
             @PathVariable Long dealId,
-            @RequestBody DealDto.MoveRequest request
+            @Valid @RequestBody DealDto.MoveRequest request
     ) {
-        return ResponseEntity.ok(dealService.moveDeal(agencyId, dealId, request.getTargetStageId()));
+        return ResponseEntity.ok(dealService.moveDeal(agencyId, dealId, request.getStageId()));
     }
 
-    // PATCH /api/agencies/{agencyId}/deals/{dealId}/lose
-    @PatchMapping("/{dealId}/lose")
+    // PATCH /api/agencies/{agencyId}/deals/{dealId}/lost
+    @PatchMapping("/{dealId}/lost")
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
     public ResponseEntity<DealDto.Response> markAsLost(
             @PathVariable Long agencyId,
@@ -84,13 +84,33 @@ public class DealController {
         return ResponseEntity.ok(dealService.markAsLost(agencyId, dealId, request.getReason()));
     }
 
+    // PATCH /api/agencies/{agencyId}/deals/{dealId}/won
+    @PatchMapping("/{dealId}/won")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
+    public ResponseEntity<DealDto.Response> markAsWon(
+            @PathVariable Long agencyId,
+            @PathVariable Long dealId
+    ) {
+        return ResponseEntity.ok(dealService.markAsWon(agencyId, dealId));
+    }
+
+    // PATCH /api/agencies/{agencyId}/deals/{dealId}/reopen
+    @PatchMapping("/{dealId}/reopen")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
+    public ResponseEntity<DealDto.Response> reopen(
+            @PathVariable Long agencyId,
+            @PathVariable Long dealId
+    ) {
+        return ResponseEntity.ok(dealService.reopen(agencyId, dealId));
+    }
+
     // PUT /api/agencies/{agencyId}/deals/{dealId}
     @PutMapping("/{dealId}")
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','MEMBER')")
     public ResponseEntity<DealDto.Response> update(
             @PathVariable Long agencyId,
             @PathVariable Long dealId,
-            @Valid @RequestBody DealDto.Request dto
+            @Valid @RequestBody DealDto.UpdateRequest dto
     ) {
         return ResponseEntity.ok(dealService.update(agencyId, dealId, dto));
     }

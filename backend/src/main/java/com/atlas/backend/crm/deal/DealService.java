@@ -3,6 +3,7 @@ package com.atlas.backend.crm.deal;
 import com.atlas.backend.client.Client;
 import com.atlas.backend.client.ClientRepository;
 import com.atlas.backend.common.exception.ResourceNotFoundException;
+import com.atlas.backend.crm.pipeline.PipelineRepository;
 import com.atlas.backend.crm.pipeline.PipelineStage;
 import com.atlas.backend.crm.pipeline.PipelineStageRepository;
 import com.atlas.backend.user.User;
@@ -26,6 +27,7 @@ public class DealService {
     private final DealRepository          dealRepository;
     private final ClientRepository        clientRepository;
     private final PipelineStageRepository stageRepository;
+    private final PipelineRepository      pipelineRepository;
     private final UserRepository          userRepository;
 
     // ─── Créer ───────────────────────────────────────────────────────────────
@@ -35,7 +37,7 @@ public class DealService {
         Client client = clientRepository.findByIdAndAgencyId(dto.getClientId(), agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Client introuvable"));
 
-        PipelineStage stage = stageRepository.findById(dto.getStageId())
+        PipelineStage stage = stageRepository.findByIdAndAgencyId(dto.getStageId(), agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Etape introuvable"));
 
         User owner = null;
@@ -81,13 +83,17 @@ public class DealService {
 
     @Transactional(readOnly = true)
     public List<DealDto.KanbanColumn> getKanbanView(Long agencyId, Long pipelineId) {
+        // Garantit que le pipeline demandé appartient bien à l'agence appelante.
+        if (!pipelineRepository.existsByIdAndAgencyId(pipelineId, agencyId)) {
+            throw new ResourceNotFoundException("Pipeline introuvable");
+        }
+
         List<PipelineStage> stages = stageRepository.findByPipelineIdOrderByPositionAsc(pipelineId);
 
         return stages.stream().map(stage -> {
-            List<Deal> stageDeals = dealRepository.findByStageId(stage.getId())
-                    .stream()
-                    .filter(d -> d.getStatus() == Deal.DealStatus.OPEN)
-                    .toList();
+            // Toutes les cartes de l'étape, y compris gagnées/perdues : un deal
+            // gagné vit dans la colonne "Gagné", il ne doit pas disparaître.
+            List<Deal> stageDeals = dealRepository.findByStageId(stage.getId());
 
             BigDecimal total = stageDeals.stream()
                     .map(Deal::getAmount)
@@ -117,7 +123,7 @@ public class DealService {
     public DealDto.Response moveDeal(Long agencyId, Long dealId, Long targetStageId) {
         Deal deal = getDealSecure(agencyId, dealId);
 
-        PipelineStage targetStage = stageRepository.findById(targetStageId)
+        PipelineStage targetStage = stageRepository.findByIdAndAgencyId(targetStageId, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Etape cible introuvable"));
 
         String previousStage = deal.getStage() != null ? deal.getStage().getName() : "aucune";
@@ -133,6 +139,11 @@ public class DealService {
             deal.setStatus(Deal.DealStatus.LOST);
             deal.setActualCloseDate(LocalDate.now());
             log.info("[CRM] Deal perdu deal={}", dealId);
+        } else {
+            // Étape non terminale → le deal redevient (ou reste) ouvert :
+            // le statut doit toujours refléter la colonne courante.
+            deal.setStatus(Deal.DealStatus.OPEN);
+            deal.setActualCloseDate(null);
         }
 
         log.info("[CRM] Deal deplace deal={} '{}' -> '{}'", dealId, previousStage, targetStage.getName());
@@ -155,32 +166,63 @@ public class DealService {
         return toResponse(dealRepository.save(deal));
     }
 
-    // ─── Modifier ────────────────────────────────────────────────────────────
+    // ─── Modifier (mise à jour partielle) ────────────────────────────────────
 
     @Transactional
-    public DealDto.Response update(Long agencyId, Long dealId, DealDto.Request dto) {
+    public DealDto.Response update(Long agencyId, Long dealId, DealDto.UpdateRequest dto) {
         Deal deal = getDealSecure(agencyId, dealId);
 
-        if (!deal.getClient().getId().equals(dto.getClientId())) {
-            Client newClient = clientRepository.findByIdAndAgencyId(dto.getClientId(), agencyId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Client introuvable"));
-            deal.setClient(newClient);
+        if (dto.getTitle() != null)             deal.setTitle(dto.getTitle());
+        if (dto.getDescription() != null)       deal.setDescription(dto.getDescription());
+        if (dto.getAmount() != null)            deal.setAmount(dto.getAmount());
+        if (dto.getPriority() != null)          deal.setPriority(dto.getPriority());
+        if (dto.getExpectedCloseDate() != null) deal.setExpectedCloseDate(dto.getExpectedCloseDate());
+
+        if (dto.getOwnerId() != null) {
+            User owner = userRepository.findById(dto.getOwnerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+            deal.setOwner(owner);
         }
 
-        if (!deal.getStage().getId().equals(dto.getStageId())) {
-            PipelineStage newStage = stageRepository.findById(dto.getStageId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Etape introuvable"));
-            deal.setStage(newStage);
-        }
-
-        deal.setTitle(dto.getTitle());
-        deal.setDescription(dto.getDescription());
-        deal.setAmount(dto.getAmount() != null ? dto.getAmount() : BigDecimal.ZERO);
-        deal.setExpectedCloseDate(dto.getExpectedCloseDate());
-        deal.setPriority(dto.getPriority() != null ? dto.getPriority() : Deal.DealPriority.MEDIUM);
         deal.recalculateWeightedAmount();
         deal.recordActivity();
 
+        return toResponse(dealRepository.save(deal));
+    }
+
+    // ─── Marquer comme gagné ─────────────────────────────────────────────────
+
+    @Transactional
+    public DealDto.Response markAsWon(Long agencyId, Long dealId) {
+        Deal deal = getDealSecure(agencyId, dealId);
+        deal.setStatus(Deal.DealStatus.WON);
+        deal.setActualCloseDate(LocalDate.now());
+        deal.setLostReason(null);
+        deal.recordActivity();
+
+        // Place le deal dans l'étape terminale "Gagné" si le pipeline en a une.
+        if (deal.getStage() != null) {
+            stageRepository.findByPipelineIdAndIsWonTrue(deal.getStage().getPipeline().getId())
+                    .ifPresent(deal::setStage);
+        }
+        deal.recalculateWeightedAmount();
+
+        log.info("[CRM] Deal gagne agence={} deal={}", agencyId, dealId);
+        return toResponse(dealRepository.save(deal));
+    }
+
+    // ─── Rouvrir un deal clôturé ─────────────────────────────────────────────
+
+    @Transactional
+    public DealDto.Response reopen(Long agencyId, Long dealId) {
+        Deal deal = getDealSecure(agencyId, dealId);
+        deal.setStatus(Deal.DealStatus.OPEN);
+        deal.setActualCloseDate(null);
+        deal.setLostReason(null);
+        deal.recordActivity();
+        deal.recalculateWeightedAmount();
+
+        log.info("[CRM] Deal rouvert agence={} deal={}", agencyId, dealId);
         return toResponse(dealRepository.save(deal));
     }
 

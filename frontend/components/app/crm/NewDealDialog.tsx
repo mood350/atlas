@@ -217,6 +217,13 @@ export function NewDealDialog({
                 ))}
               </SelectContent>
             </Select>
+            {errors.stageId ? (
+              <p className="caption-14 text-danger">{errors.stageId.message}</p>
+            ) : !pipeline?.stages?.length ? (
+              <p className="caption-14 text-danger">
+                Ce pipeline n&apos;a aucune étape — impossible de créer un deal.
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-1.5">

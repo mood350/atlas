@@ -40,7 +40,9 @@ public class PipelineService {
                 .active(true)
                 .build();
 
-        return pipelineRepository.save(pipeline);
+        pipeline = pipelineRepository.save(pipeline);
+        seedDefaultStages(pipeline);
+        return pipeline;
     }
 
     // ─── Initialiser le pipeline par défaut à la création de l'agence ────────
@@ -59,8 +61,21 @@ public class PipelineService {
                 .build();
 
         pipeline = pipelineRepository.save(pipeline);
+        seedDefaultStages(pipeline);
 
-        // Création des 6 étapes standard
+        log.info("[PIPELINE] Pipeline par défaut créé — agence='{}'", agency.getName());
+
+        return pipeline;
+    }
+
+    // ─── Étapes standard ─────────────────────────────────────────────────────
+    /**
+     * Crée les 6 étapes standard sur un pipeline déjà persisté.
+     * Partagé par {@link #initializeDefaultPipeline} et {@link #create} pour
+     * qu'un pipeline ne soit jamais livré sans étapes (sinon le Kanban est
+     * vide et la création de deal échoue faute d'étape sélectionnable).
+     */
+    private void seedDefaultStages(Pipeline pipeline) {
         String[][] defaultStages = {
                 // { nom, couleur, probabilité, isWon, isLost }
                 { "Prospect",      "#6B7280", "10",  "false", "false" },
@@ -84,11 +99,6 @@ public class PipelineService {
                     .build();
             stageRepository.save(stage);
         }
-
-        log.info("[PIPELINE] Pipeline par défaut créé — agence='{}' avec {} étapes",
-                agency.getName(), defaultStages.length);
-
-        return pipeline;
     }
 
     // ─── Lister les pipelines d'une agence ───────────────────────────────────

@@ -40,6 +40,25 @@ public class DealDto {
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    //  UPDATE REQUEST — modification partielle d'un deal
+    //  Tous les champs sont optionnels : seuls les champs non-null sont appliqués.
+    //  Le client et l'étape ne se modifient pas ici (move dédié pour l'étape).
+    // ──────────────────────────────────────────────────────────────────────────
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class UpdateRequest {
+        private String title;
+        private String description;
+
+        @DecimalMin(value = "0", message = "Le montant ne peut pas être négatif")
+        private BigDecimal amount;
+
+        private Deal.DealPriority priority;
+        private LocalDate expectedCloseDate;
+        private Long ownerId;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     //  RESPONSE — retourné à l'API
     // ──────────────────────────────────────────────────────────────────────────
 
@@ -87,8 +106,11 @@ public class DealDto {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor
     public static class MoveRequest {
-        @NotNull
-        private Long targetStageId;
+        @NotNull(message = "L'étape cible est obligatoire")
+        private Long stageId;
+
+        /** Index de la carte dans la colonne cible — informatif (pas encore persisté). */
+        private Integer position;
     }
 
     // ──────────────────────────────────────────────────────────────────────────

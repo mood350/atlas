@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Filter, Kanban, List, Plus } from "lucide-react";
+import { ChevronDown, Columns3, Filter, Kanban, List, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,6 +26,7 @@ interface PipelineHeaderProps {
   onChangeView: (view: ViewMode) => void;
   onCreateDeal: () => void;
   onCreatePipeline?: () => void;
+  onAddStage?: () => void;
 }
 
 const filterLabels: Record<DealFilter, string> = {
@@ -44,6 +45,7 @@ export function PipelineHeader({
   onChangeView,
   onCreateDeal,
   onCreatePipeline,
+  onAddStage,
 }: PipelineHeaderProps) {
   const activePipeline = pipelines.find((p) => p.id === activePipelineId);
 
@@ -82,13 +84,21 @@ export function PipelineHeader({
               Aucun pipeline
             </div>
           ) : null}
-          {onCreatePipeline ? (
+          {onAddStage || onCreatePipeline ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onCreatePipeline}>
-                <Plus className="mr-2 h-3.5 w-3.5" />
-                Nouveau pipeline
-              </DropdownMenuItem>
+              {onAddStage && activePipeline ? (
+                <DropdownMenuItem onClick={onAddStage}>
+                  <Columns3 className="mr-2 h-3.5 w-3.5" />
+                  Ajouter une étape
+                </DropdownMenuItem>
+              ) : null}
+              {onCreatePipeline ? (
+                <DropdownMenuItem onClick={onCreatePipeline}>
+                  <Plus className="mr-2 h-3.5 w-3.5" />
+                  Nouveau pipeline
+                </DropdownMenuItem>
+              ) : null}
             </>
           ) : null}
         </DropdownMenuContent>

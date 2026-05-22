@@ -73,7 +73,7 @@ public class QuoteDto {
         @DecimalMax(value = "100")
         private BigDecimal taxRate;
 
-        @Future(message = "La date de validité doit être dans le futur")
+        @FutureOrPresent(message = "La date de validité ne peut pas être dans le passé")
         private LocalDate validUntil;
 
         private String paymentTerms;

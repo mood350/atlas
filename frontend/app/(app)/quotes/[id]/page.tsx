@@ -16,7 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/app/shared/StatusBadge";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { useQuote, useSendQuote, useDeleteQuote } from "@/hooks/use-quotes";
+import {
+  useQuote,
+  useSendQuote,
+  useDeleteQuote,
+  useMarkQuoteNegotiating,
+  useMarkQuoteAccepted,
+  useMarkQuoteRejected,
+} from "@/hooks/use-quotes";
 import { requireAgencyId } from "@/hooks/use-agency";
 import { downloadQuotePdf } from "@/lib/api/quotes";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
@@ -49,8 +56,11 @@ export default function QuoteDetailPage({
     quote ? quote.title : undefined,
   );
 
-  const sendQuote  = useSendQuote();
-  const deleteQuote = useDeleteQuote();
+  const sendQuote         = useSendQuote();
+  const deleteQuote       = useDeleteQuote();
+  const markNegotiating   = useMarkQuoteNegotiating();
+  const markAccepted      = useMarkQuoteAccepted();
+  const markRejected      = useMarkQuoteRejected();
 
   async function handleSend() {
     if (!quote) return;
@@ -73,6 +83,39 @@ export default function QuoteDetailPage({
       a.download = `${quote.quoteNumber}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(extractErrorMessage(err));
+    }
+  }
+
+  async function handleMarkNegotiating() {
+    if (!quote) return;
+    try {
+      await markNegotiating.mutateAsync(quote.id);
+      toast.success("Devis passé en négociation");
+    } catch (err) {
+      toast.error(extractErrorMessage(err));
+    }
+  }
+
+  async function handleMarkAccepted() {
+    if (!quote) return;
+    if (!confirm(`Marquer le devis ${quote.quoteNumber} comme accepté ?`)) return;
+    try {
+      await markAccepted.mutateAsync(quote.id);
+      toast.success("Devis marqué comme accepté");
+    } catch (err) {
+      toast.error(extractErrorMessage(err));
+    }
+  }
+
+  async function handleMarkRejected() {
+    if (!quote) return;
+    const reason = window.prompt("Motif du refus (optionnel) :") ?? undefined;
+    if (reason === null) return;
+    try {
+      await markRejected.mutateAsync({ quoteId: quote.id, reason: reason || undefined });
+      toast.success("Devis marqué comme refusé");
     } catch (err) {
       toast.error(extractErrorMessage(err));
     }
@@ -109,7 +152,9 @@ export default function QuoteDetailPage({
     );
   }
 
-  const canSend = quote.status === "DRAFT" || quote.status === "REJECTED";
+  const canSend = ["DRAFT", "SENT", "VIEWED", "NEGOTIATING", "REJECTED"].includes(quote.status);
+  const isSentAlready = ["SENT", "VIEWED", "NEGOTIATING"].includes(quote.status);
+  const canTransition = ["SENT", "VIEWED", "NEGOTIATING"].includes(quote.status);
   const canEdit = quote.status === "DRAFT";
 
   return (
@@ -139,7 +184,47 @@ export default function QuoteDetailPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {canTransition ? (
+            <>
+              {quote.status !== "NEGOTIATING" ? (
+                <Button
+                  variant="outline"
+                  onClick={handleMarkNegotiating}
+                  disabled={markNegotiating.isPending}
+                  className="rounded-full border-warning text-warning hover:bg-warning-bg active:scale-95 transition-transform"
+                >
+                  {markNegotiating.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  En négociation
+                </Button>
+              ) : null}
+              <Button
+                variant="outline"
+                onClick={handleMarkAccepted}
+                disabled={markAccepted.isPending}
+                className="rounded-full border-success text-success hover:bg-success-bg active:scale-95 transition-transform"
+              >
+                {markAccepted.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Marquer accepté
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleMarkRejected}
+                disabled={markRejected.isPending}
+                className="rounded-full text-danger hover:bg-danger-bg hover:text-danger active:scale-95 transition-transform"
+              >
+                {markRejected.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Marquer refusé
+              </Button>
+            </>
+          ) : null}
+
           {canSend ? (
             <Button
               onClick={handleSend}
@@ -151,7 +236,7 @@ export default function QuoteDetailPage({
               ) : (
                 <Send className="mr-2 h-4 w-4" />
               )}
-              Envoyer
+              {isSentAlready ? "Ré-envoyer" : "Envoyer"}
             </Button>
           ) : null}
 
@@ -373,6 +458,12 @@ export default function QuoteDetailPage({
                     {quote.status === "ACCEPTED" ? "Accepté" : "Refusé"} le{" "}
                     {formatDateTime(quote.respondedAt)}
                   </span>
+                </li>
+              ) : null}
+              {quote.status === "NEGOTIATING" ? (
+                <li className="flex gap-3 text-foreground-muted">
+                  <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-warning" />
+                  <span>En cours de négociation</span>
                 </li>
               ) : null}
             </ol>

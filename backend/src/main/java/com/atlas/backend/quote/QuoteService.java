@@ -264,6 +264,51 @@ public class QuoteService {
         return quoteMapper.toResponse(quote);
     }
 
+    // ─── Transitions manuelles (agence) ──────────────────────────────────────
+
+    @Transactional
+    public QuoteDto.Response markAsNegotiating(Long agencyId, Long quoteId) {
+        Quote quote = getQuoteSecure(agencyId, quoteId);
+        if (!quote.canTransitionManually()) {
+            throw new IllegalStateException(
+                    "Transition impossible depuis le statut : " + quote.getStatus());
+        }
+        quote.setStatus(Quote.QuoteStatus.NEGOTIATING);
+        Quote saved = quoteRepository.save(quote);
+        log.info("[QUOTE] Devis passe en negotiation quote='{}'", quote.getQuoteNumber());
+        return quoteMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public QuoteDto.Response markAsAccepted(Long agencyId, Long quoteId) throws MessagingException {
+        Quote quote = getQuoteSecure(agencyId, quoteId);
+        if (!quote.canTransitionManually()) {
+            throw new IllegalStateException(
+                    "Transition impossible depuis le statut : " + quote.getStatus());
+        }
+        quote.setStatus(Quote.QuoteStatus.ACCEPTED);
+        quote.setRespondedAt(LocalDateTime.now());
+        Quote saved = quoteRepository.save(quote);
+        log.info("[QUOTE] Devis marque accepte (manuellement) quote='{}'", quote.getQuoteNumber());
+        return quoteMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public QuoteDto.Response markAsRejected(Long agencyId, Long quoteId, String reason) throws MessagingException {
+        Quote quote = getQuoteSecure(agencyId, quoteId);
+        if (!quote.canTransitionManually()) {
+            throw new IllegalStateException(
+                    "Transition impossible depuis le statut : " + quote.getStatus());
+        }
+        quote.setStatus(Quote.QuoteStatus.REJECTED);
+        quote.setRejectionReason(reason);
+        quote.setRespondedAt(LocalDateTime.now());
+        Quote saved = quoteRepository.save(quote);
+        log.info("[QUOTE] Devis marque refuse (manuellement) quote='{}' raison='{}'",
+                quote.getQuoteNumber(), reason);
+        return quoteMapper.toResponse(saved);
+    }
+
     // ─── Supprimer (DRAFT uniquement) ─────────────────────────────────────────
 
     @Transactional
@@ -291,7 +336,8 @@ public class QuoteService {
         long total    = quoteRepository.countByAgencyId(agencyId);
         long drafts   = quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.DRAFT);
         long sent     = quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.SENT)
-                + quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.VIEWED);
+                + quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.VIEWED)
+                + quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.NEGOTIATING);
         long accepted = quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.ACCEPTED);
         long rejected = quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.REJECTED);
         long expired  = quoteRepository.countByAgencyIdAndStatus(agencyId, Quote.QuoteStatus.EXPIRED);

@@ -2,6 +2,7 @@ package com.atlas.backend.auth;
 
 import com.atlas.backend.agency.Agency;
 import com.atlas.backend.agency.AgencyRepository;
+import com.atlas.backend.crm.pipeline.PipelineService;
 import com.atlas.backend.email.EmailService;
 import com.atlas.backend.email.EmailTemplateName;
 import com.atlas.backend.role.RoleRepository;
@@ -43,6 +44,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
+    private final PipelineService pipelineService;
 
     @Value("${application.mail.from: no-reply@example.com}")
     private String from;
@@ -94,6 +96,10 @@ public class AuthenticationService {
         // 3. Lie le User à l'agence
         user.setAgency(agency);
         userRepository.save(user);
+
+        // 4. Initialise le pipeline CRM par défaut (6 étapes standard).
+        //    Sans ça, le Kanban est vide et la création de deal échoue.
+        pipelineService.initializeDefaultPipeline(agency);
 
         sendConfirmationEmail(user);
     }

@@ -16,6 +16,20 @@ public interface PipelineStageRepository extends JpaRepository<PipelineStage, Lo
 
     Optional<PipelineStage> findByIdAndPipelineId(Long id, Long pipelineId);
 
+    /**
+     * Charge une étape en garantissant qu'elle appartient bien à l'agence
+     * (via pipeline → agency). Empêche un tenant de référencer l'étape
+     * d'une autre agence lors de la création/déplacement d'un deal.
+     */
+    @Query("""
+        SELECT s FROM PipelineStage s
+        WHERE s.id = :id AND s.pipeline.agency.id = :agencyId
+        """)
+    Optional<PipelineStage> findByIdAndAgencyId(
+            @Param("id")       Long id,
+            @Param("agencyId") Long agencyId
+    );
+
     Optional<PipelineStage> findByPipelineIdAndIsWonTrue(Long pipelineId);
 
     Optional<PipelineStage> findByPipelineIdAndIsLostTrue(Long pipelineId);

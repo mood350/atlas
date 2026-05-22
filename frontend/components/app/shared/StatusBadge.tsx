@@ -39,6 +39,7 @@ const map: Record<AnyStatus, { label: string; className: string }> = {
   },
   SENT: { label: "Envoyé", className: "bg-info-bg text-info" },
   VIEWED: { label: "Vu", className: "bg-info-bg text-info" },
+  NEGOTIATING: { label: "En négociation", className: "bg-warning-bg text-warning" },
   ACCEPTED: { label: "Accepté", className: "bg-success-bg text-success" },
   REJECTED: { label: "Refusé", className: "bg-danger-bg text-danger" },
   EXPIRED: {

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { KanbanBoard } from "@/components/app/crm/KanbanBoard";
 import { PipelineHeader, type DealFilter, type ViewMode } from "@/components/app/crm/PipelineHeader";
 import { NewDealDialog } from "@/components/app/crm/NewDealDialog";
+import { AddStageDialog } from "@/components/app/crm/AddStageDialog";
 import { DealSheet } from "@/components/app/crm/DealSheet";
 import { EmptyState } from "@/components/app/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ export default function PipelinePage() {
   const [view, setView] = useState<ViewMode>("kanban");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createStageId, setCreateStageId] = useState<number | null>(null);
+  const [addStageOpen, setAddStageOpen] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
 
   const [newPipelineOpen, setNewPipelineOpen] = useState(false);
@@ -177,6 +179,7 @@ export default function PipelinePage() {
         onChangeView={setView}
         onCreateDeal={() => handleCreateDeal()}
         onCreatePipeline={() => setNewPipelineOpen(true)}
+        onAddStage={() => setAddStageOpen(true)}
       />
 
       <div className="-mx-4 flex-1 overflow-hidden px-4 md:-mx-8 md:px-8">
@@ -228,6 +231,15 @@ export default function PipelinePage() {
           <EmptyState
             title="Pipeline sans étapes"
             description="Ce pipeline n'a pas encore d'étapes. Ajoutez des étapes pour commencer à gérer vos deals."
+            action={
+              <Button
+                onClick={() => setAddStageOpen(true)}
+                className="rounded-full active:scale-95 transition-transform"
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Ajouter une étape
+              </Button>
+            }
           />
         ) : null}
 
@@ -255,6 +267,12 @@ export default function PipelinePage() {
         onOpenChange={setCreateDialogOpen}
         pipeline={activePipeline}
         defaultStageId={createStageId}
+      />
+
+      <AddStageDialog
+        open={addStageOpen}
+        onOpenChange={setAddStageOpen}
+        pipeline={activePipeline}
       />
 
       <DealSheet

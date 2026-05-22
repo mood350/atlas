@@ -155,6 +155,7 @@ export type QuoteStatus =
   | "DRAFT"
   | "SENT"
   | "VIEWED"
+  | "NEGOTIATING"
   | "ACCEPTED"
   | "REJECTED"
   | "EXPIRED"

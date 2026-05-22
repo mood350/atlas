@@ -55,6 +55,9 @@ import java.util.List;
                 @Index(name = "idx_quote_client",  columnList = "client_id"),
                 @Index(name = "idx_quote_number",  columnList = "quote_number"),
                 @Index(name = "idx_quote_status",  columnList = "status")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uq_quote_number_agency", columnNames = {"agency_id", "quote_number"})
         }
 )
 @EntityListeners(AuditingEntityListener.class)
@@ -74,7 +77,7 @@ public class Quote extends Listeners {
      * Numéro unique du devis — format OHADA : DEV-2025-00042
      * Généré automatiquement, immuable après création.
      */
-    @Column(name = "quote_number", unique = true, nullable = false, updatable = false)
+    @Column(name = "quote_number", nullable = false, updatable = false)
     private String quoteNumber;
 
     // ─── Relations métier ─────────────────────────────────────────────────────
@@ -228,6 +231,7 @@ public class Quote extends Listeners {
         DRAFT,
         SENT,
         VIEWED,
+        NEGOTIATING,
         ACCEPTED,
         REJECTED,
         EXPIRED,
@@ -281,7 +285,14 @@ public class Quote extends Listeners {
 
     /** Vérifie si le devis peut être envoyé. */
     public boolean isSendable() {
-        return (status == QuoteStatus.DRAFT || status == QuoteStatus.SENT)
+        return (status == QuoteStatus.DRAFT || status == QuoteStatus.SENT
+                || status == QuoteStatus.VIEWED || status == QuoteStatus.NEGOTIATING)
                 && !items.isEmpty();
+    }
+
+    /** Vérifie si l'agence peut forcer une transition de statut manuellement. */
+    public boolean canTransitionManually() {
+        return status == QuoteStatus.SENT || status == QuoteStatus.VIEWED
+                || status == QuoteStatus.NEGOTIATING;
     }
 }

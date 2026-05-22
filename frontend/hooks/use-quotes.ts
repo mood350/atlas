@@ -14,6 +14,9 @@ import {
   sendQuote,
   deleteQuote,
   getQuoteStats,
+  markQuoteNegotiating,
+  markQuoteAccepted,
+  markQuoteRejected,
   type QuoteListParams,
   type CreateQuotePayload,
 } from "@/lib/api/quotes";
@@ -93,6 +96,41 @@ export function useDeleteQuote() {
     mutationFn: (quoteId: number) => deleteQuote(agencyId!, quoteId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quotes", agencyId] });
+      qc.invalidateQueries({ queryKey: ["quote-stats", agencyId] });
+    },
+  });
+}
+
+function useQuoteStatusMutation(mutationFn: (agencyId: number, quoteId: number) => Promise<import("@/types/api").Quote>) {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (quoteId: number) => mutationFn(agencyId!, quoteId),
+    onSuccess: (quote) => {
+      qc.invalidateQueries({ queryKey: ["quotes", agencyId] });
+      qc.setQueryData(["quote", agencyId, quote.id], quote);
+      qc.invalidateQueries({ queryKey: ["quote-stats", agencyId] });
+    },
+  });
+}
+
+export function useMarkQuoteNegotiating() {
+  return useQuoteStatusMutation(markQuoteNegotiating);
+}
+
+export function useMarkQuoteAccepted() {
+  return useQuoteStatusMutation(markQuoteAccepted);
+}
+
+export function useMarkQuoteRejected() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ quoteId, reason }: { quoteId: number; reason?: string }) =>
+      markQuoteRejected(agencyId!, quoteId, reason),
+    onSuccess: (quote) => {
+      qc.invalidateQueries({ queryKey: ["quotes", agencyId] });
+      qc.setQueryData(["quote", agencyId, quote.id], quote);
       qc.invalidateQueries({ queryKey: ["quote-stats", agencyId] });
     },
   });

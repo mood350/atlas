@@ -95,6 +95,32 @@ export async function downloadQuotePdf(
   return data;
 }
 
+export async function markQuoteNegotiating(agencyId: number, quoteId: number): Promise<Quote> {
+  const { data } = await api.post<Quote>(
+    `/api/agencies/${agencyId}/quotes/${quoteId}/mark-negotiating`,
+  );
+  return data;
+}
+
+export async function markQuoteAccepted(agencyId: number, quoteId: number): Promise<Quote> {
+  const { data } = await api.post<Quote>(
+    `/api/agencies/${agencyId}/quotes/${quoteId}/mark-accepted`,
+  );
+  return data;
+}
+
+export async function markQuoteRejected(
+  agencyId: number,
+  quoteId: number,
+  reason?: string,
+): Promise<Quote> {
+  const { data } = await api.post<Quote>(
+    `/api/agencies/${agencyId}/quotes/${quoteId}/mark-rejected`,
+    reason ? { reason } : {},
+  );
+  return data;
+}
+
 export async function getQuoteStats(agencyId: number): Promise<QuoteStats> {
   const { data } = await api.get<QuoteStats>(
     `/api/agencies/${agencyId}/quotes/stats`,

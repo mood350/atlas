@@ -2,6 +2,7 @@ package com.atlas.backend.config;
 
 import com.atlas.backend.agency.Agency;
 import com.atlas.backend.agency.AgencyRepository;
+import com.atlas.backend.crm.pipeline.PipelineService;
 import com.atlas.backend.role.Role;
 import com.atlas.backend.role.RoleRepository;
 import com.atlas.backend.user.User;
@@ -28,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository    userRepository;
     private final AgencyRepository  agencyRepository;
     private final PasswordEncoder   passwordEncoder;
+    private final PipelineService   pipelineService;
 
     private static final List<RoleSeed> SEEDS = List.of(
             new RoleSeed("SUPER_ADMIN", "Administrateur plateforme"),
@@ -95,6 +97,8 @@ public class DataInitializer implements CommandLineRunner {
 
         user.setAgency(agency);
         userRepository.save(user);
+
+        pipelineService.initializeDefaultPipeline(agency);
 
         log.info("[DataInitializer] Compte de test créé → email: {} / password: {}", DEV_EMAIL, DEV_PASSWORD);
     }
