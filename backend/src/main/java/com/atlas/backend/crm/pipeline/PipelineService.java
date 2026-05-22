@@ -95,7 +95,7 @@ public class PipelineService {
 
     @Transactional(readOnly = true)
     public List<Pipeline> findAllByAgency(Long agencyId) {
-        return pipelineRepository.findByAgencyIdAndActiveTrue(agencyId);
+        return pipelineRepository.findAllWithStages(agencyId);
     }
 
     // ─── Récupérer un pipeline avec ses stages ────────────────────────────────

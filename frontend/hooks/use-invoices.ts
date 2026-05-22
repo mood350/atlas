@@ -1,0 +1,106 @@
+"use client";
+
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  listInvoices,
+  getInvoice,
+  createInvoice,
+  sendInvoice,
+  recordPayment,
+  deleteInvoice,
+  getInvoiceStats,
+  type InvoiceListParams,
+  type CreateInvoicePayload,
+} from "@/lib/api/invoices";
+import { useAgencyId } from "./use-agency";
+
+export function useInvoices(params: InvoiceListParams = {}) {
+  const agencyId = useAgencyId();
+  return useQuery({
+    queryKey: ["invoices", agencyId, params],
+    queryFn: () => listInvoices(agencyId!, params),
+    enabled: !!agencyId,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useInvoice(invoiceId: number | null) {
+  const agencyId = useAgencyId();
+  return useQuery({
+    queryKey: ["invoice", agencyId, invoiceId],
+    queryFn: () => getInvoice(agencyId!, invoiceId!),
+    enabled: !!agencyId && !!invoiceId,
+  });
+}
+
+export function useInvoiceStats() {
+  const agencyId = useAgencyId();
+  return useQuery({
+    queryKey: ["invoice-stats", agencyId],
+    queryFn: () => getInvoiceStats(agencyId!),
+    enabled: !!agencyId,
+    staleTime: 60_000,
+  });
+}
+
+export function useCreateInvoice() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateInvoicePayload) => createInvoice(agencyId!, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices", agencyId] });
+      qc.invalidateQueries({ queryKey: ["invoice-stats", agencyId] });
+    },
+  });
+}
+
+export function useSendInvoice() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (invoiceId: number) => sendInvoice(agencyId!, invoiceId),
+    onSuccess: (invoice) => {
+      qc.invalidateQueries({ queryKey: ["invoices", agencyId] });
+      qc.setQueryData(["invoice", agencyId, invoice.id], invoice);
+    },
+  });
+}
+
+export function useRecordPayment() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      amount,
+      transactionId,
+    }: {
+      invoiceId: number;
+      amount: number;
+      transactionId?: string;
+    }) => recordPayment(agencyId!, invoiceId, amount, transactionId),
+    onSuccess: (invoice) => {
+      qc.invalidateQueries({ queryKey: ["invoices", agencyId] });
+      qc.setQueryData(["invoice", agencyId, invoice.id], invoice);
+      qc.invalidateQueries({ queryKey: ["invoice-stats", agencyId] });
+    },
+  });
+}
+
+export function useDeleteInvoice() {
+  const agencyId = useAgencyId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (invoiceId: number) => deleteInvoice(agencyId!, invoiceId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices", agencyId] });
+      qc.invalidateQueries({ queryKey: ["invoice-stats", agencyId] });
+    },
+  });
+}

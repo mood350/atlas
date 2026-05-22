@@ -1,10 +1,12 @@
 package com.atlas.backend.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,6 +39,12 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect");
     }
 
+    // ─── Compte non activé (403) ─────────────────────────────────────────────
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiError> handleDisabled(DisabledException ex) {
+        return error(HttpStatus.FORBIDDEN, "Votre compte n'est pas encore activé. Vérifiez votre email.");
+    }
+
     // ─── Compte verrouillé (423) ─────────────────────────────────────────────
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ApiError> handleLocked(LockedException ex) {
@@ -64,9 +72,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiError);
     }
 
+    // ─── Violation d'unicité en BDD (409) ───────────────────────────────────
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String root = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
+        String message;
+        if (root.contains("phone_number")) {
+            message = "Ce numéro de téléphone est déjà associé à un compte.";
+        } else if (root.contains("email")) {
+            message = "Cette adresse email est déjà utilisée.";
+        } else if (root.contains("subdomain")) {
+            message = "Ce nom d'agence génère un sous-domaine déjà pris. Essayez un nom légèrement différent.";
+        } else {
+            message = "Une valeur unique est déjà utilisée. Vérifiez vos informations.";
+        }
+        return error(HttpStatus.CONFLICT, message);
+    }
+
     // ─── Erreur métier générale (400) ────────────────────────────────────────
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex) {
+    @ExceptionHandler({ IllegalStateException.class, IllegalArgumentException.class })
+    public ResponseEntity<ApiError> handleBusiness(RuntimeException ex) {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

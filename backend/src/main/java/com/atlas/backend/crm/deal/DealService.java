@@ -93,12 +93,18 @@ public class DealService {
                     .map(Deal::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+            DealDto.KanbanColumn.StageInfo stageInfo = DealDto.KanbanColumn.StageInfo.builder()
+                    .id(stage.getId())
+                    .name(stage.getName())
+                    .color(stage.getColor())
+                    .position(stage.getPosition())
+                    .probability(stage.getWinProbability())
+                    .pipelineId(pipelineId)
+                    .build();
+
             return DealDto.KanbanColumn.builder()
-                    .stageId(stage.getId())
-                    .stageName(stage.getName())
-                    .stageColor(stage.getColor())
-                    .winProbability(stage.getWinProbability())
-                    .dealsCount(stageDeals.size())
+                    .stage(stageInfo)
+                    .count(stageDeals.size())
                     .totalAmount(total)
                     .deals(stageDeals.stream().map(this::toResponse).toList())
                     .build();
@@ -213,19 +219,24 @@ public class DealService {
     // ─── Mapper ──────────────────────────────────────────────────────────────
 
     public DealDto.Response toResponse(Deal deal) {
+        PipelineStage stage = deal.getStage();
         return DealDto.Response.builder()
                 .id(deal.getId())
+                .agencyId(deal.getAgency().getId())
                 .title(deal.getTitle())
                 .description(deal.getDescription())
                 .clientId(deal.getClient().getId())
                 .clientName(deal.getClient().getName())
-                .stageId(deal.getStage() != null ? deal.getStage().getId() : null)
-                .stageName(deal.getStage() != null ? deal.getStage().getName() : null)
-                .stageColor(deal.getStage() != null ? deal.getStage().getColor() : null)
-                .stageWinProbability(deal.getStage() != null ? deal.getStage().getWinProbability() : 0)
+                .pipelineId(stage != null ? stage.getPipeline().getId() : null)
+                .stageId(stage != null ? stage.getId() : null)
+                .stageName(stage != null ? stage.getName() : null)
+                .stageColor(stage != null ? stage.getColor() : null)
+                .stageWinProbability(stage != null ? stage.getWinProbability() : 0)
                 .ownerId(deal.getOwner() != null ? deal.getOwner().getId() : null)
                 .ownerName(deal.getOwner() != null ? deal.getOwner().fullName() : null)
+                .ownerAvatarUrl(deal.getOwner() != null ? deal.getOwner().getAvatarUrl() : null)
                 .amount(deal.getAmount())
+                .currency(deal.getAgency().getCurrency())
                 .weightedAmount(deal.getWeightedAmount())
                 .status(deal.getStatus())
                 .priority(deal.getPriority())
@@ -234,7 +245,8 @@ public class DealService {
                 .lostReason(deal.getLostReason())
                 .lastActivityAt(deal.getLastActivityAt())
                 .remindersSent(deal.getRemindersSent())
-                .createdAt(deal.getCreatedAt())   // getCreatedAt() — champ Listeners
+                .createdAt(deal.getCreatedAt())
+                .updatedAt(deal.getLastModifiedDate())
                 .build();
     }
 

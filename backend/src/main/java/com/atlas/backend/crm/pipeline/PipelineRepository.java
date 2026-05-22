@@ -30,4 +30,13 @@ public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
             @Param("id")       Long id,
             @Param("agencyId") Long agencyId
     );
+
+    // Récupère tous les pipelines actifs avec leurs stages (évite N+1 sur la liste)
+    @Query("""
+        SELECT DISTINCT p FROM Pipeline p
+        LEFT JOIN FETCH p.stages s
+        WHERE p.agency.id = :agencyId AND p.active = true
+        ORDER BY p.id ASC
+        """)
+    List<Pipeline> findAllWithStages(@Param("agencyId") Long agencyId);
 }

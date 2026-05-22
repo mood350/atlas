@@ -46,6 +46,7 @@ public class DealDto {
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class Response {
         private Long   id;
+        private Long   agencyId;
         private String title;
         private String description;
 
@@ -54,6 +55,7 @@ public class DealDto {
         private String clientName;
 
         // Stage résumé
+        private Long   pipelineId;
         private Long   stageId;
         private String stageName;
         private String stageColor;
@@ -62,8 +64,10 @@ public class DealDto {
         // Owner
         private Long   ownerId;
         private String ownerName;
+        private String ownerAvatarUrl;
 
         private BigDecimal amount;
+        private String     currency;
         private BigDecimal weightedAmount;
         private Deal.DealStatus   status;
         private Deal.DealPriority priority;
@@ -74,6 +78,7 @@ public class DealDto {
         private LocalDateTime lastActivityAt;
         private int           remindersSent;
         private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -101,12 +106,19 @@ public class DealDto {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class KanbanColumn {
-        private Long         stageId;
-        private String       stageName;
-        private String       stageColor;
-        private int          winProbability;
-        private int          dealsCount;
-        private BigDecimal   totalAmount;
+        private StageInfo  stage;
+        private int        count;
+        private BigDecimal totalAmount;
         private java.util.List<Response> deals;
+
+        @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+        public static class StageInfo {
+            private Long   id;
+            private String name;
+            private String color;
+            private int    position;
+            private int    probability;
+            private Long   pipelineId;
+        }
     }
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nouvelle connexion détectée</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#18181b;padding:28px 40px;">
+              <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.5px;">AtlasCRM</span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#18181b;">Nouvelle connexion détectée</h1>
+              <p style="margin:0 0 24px;font-size:15px;color:#71717a;">
+                Bonjour <strong th:text="${username}">Utilisateur</strong>,<br/>
+                Une connexion depuis un nouvel appareil ou une nouvelle adresse IP a été détectée sur votre compte.
+              </p>
+
+              <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:20px 24px;margin:0 0 28px;">
+                <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#9a3412;">Détails de la connexion</p>
+                <table cellpadding="0" cellspacing="0" style="font-size:14px;color:#71717a;line-height:1.8;">
+                  <tr>
+                    <td style="padding-right:16px;font-weight:600;color:#3f3f46;">Adresse IP</td>
+                    <td th:text="${ip}">0.0.0.0</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-right:16px;font-weight:600;color:#3f3f46;">Appareil</td>
+                    <td th:text="${device}">Navigateur inconnu</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-right:16px;font-weight:600;color:#3f3f46;">Heure</td>
+                    <td th:text="${time}">-</td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="margin:0;font-size:13px;color:#a1a1aa;">
+                Si c'était bien vous, ignorez cet email. Si vous ne reconnaissez pas cette connexion, changez immédiatement votre mot de passe.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#fafafa;padding:20px 40px;border-top:1px solid #f4f4f5;">
+              <p style="margin:0;font-size:12px;color:#a1a1aa;text-align:center;">
+                © 2025 AtlasCRM · Plateforme CRM pour agences africaines
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,5 +1,7 @@
 package com.atlas.backend.auth;
 
+import com.atlas.backend.agency.Agency;
+import com.atlas.backend.agency.AgencyRepository;
 import com.atlas.backend.email.EmailService;
 import com.atlas.backend.email.EmailTemplateName;
 import com.atlas.backend.role.RoleRepository;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,7 @@ public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AgencyRepository agencyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -50,25 +54,68 @@ public class AuthenticationService {
     //  INSCRIPTION
     // ═══════════════════════════════════════════════════════════════
 
+    @Transactional
     public void register(RegistrationRequest request) throws MessagingException {
 
-        Role userRole = roleRepository.findByRoleName("USER")
-                .orElseThrow(() -> new RuntimeException("Rôle USER introuvable en BDD"));
+        if (request.getAgencyName() == null || request.getAgencyName().isBlank()) {
+            throw new RuntimeException("Le nom de l'agence est obligatoire");
+        }
 
+        Role ownerRole = roleRepository.findByRoleName("OWNER")
+                .orElseThrow(() -> new RuntimeException("Rôle OWNER introuvable en BDD"));
+
+        // 1. Persiste le User d'abord (agency_id sera défini après)
         var user = User.builder()
                 .firstName(request.getFirstname())
                 .lastName(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(List.of(userRole))
-                .enabled(false) // ← désactivé jusqu'à confirmation email
+                .phoneNumber(request.getPhoneNumber())
+                .timezone(request.getTimezone() != null ? request.getTimezone() : "Africa/Abidjan")
+                .preferredLanguage(request.getPreferredLanguage() != null ? request.getPreferredLanguage() : "fr")
+                .roles(new ArrayList<>(List.of(ownerRole)))
+                .enabled(false)
                 .accountLocked(false)
                 .build();
 
         userRepository.save(user);
 
-        // Envoi de l'email de confirmation
+        // 2. Crée l'agence avec le User comme propriétaire
+        String subdomain = generateUniqueSubdomain(request.getAgencyName());
+        Agency agency = Agency.builder()
+                .name(request.getAgencyName())
+                .subdomain(subdomain)
+                .owner(user)
+                .active(false) // activée à la confirmation email
+                .build();
+
+        agencyRepository.save(agency);
+
+        // 3. Lie le User à l'agence
+        user.setAgency(agency);
+        userRepository.save(user);
+
         sendConfirmationEmail(user);
+    }
+
+    /**
+     * Génère un subdomain unique à partir du nom de l'agence.
+     * Ex: "Digital Agency Abidjan" → "digital-agency-abidjan"
+     * Si le subdomain existe déjà, ajoute un suffixe numérique.
+     */
+    private String generateUniqueSubdomain(String agencyName) {
+        String base = agencyName.toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
+
+        if (base.isEmpty()) base = "agency";
+
+        String subdomain = base;
+        int counter = 1;
+        while (agencyRepository.existsBySubdomain(subdomain)) {
+            subdomain = base + "-" + counter++;
+        }
+        return subdomain;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -84,7 +131,7 @@ public class AuthenticationService {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", user.fullName());
-        properties.put("confirmationUrl", activationUrl);
+        properties.put("confirmationUrl", activationUrl + "?token=" + otp);
         properties.put("activation_code", otp);
 
         emailService.sendEmail(
@@ -111,10 +158,15 @@ public class AuthenticationService {
             throw new RuntimeException("Token expiré. Un nouveau code vous a été envoyé.");
         }
 
-        // Active le compte
+        // Active le compte et l'agence associée
         User user = token.getUser();
         user.setEnabled(true);
         userRepository.save(user);
+
+        if (user.getAgency() != null && !user.getAgency().isActive()) {
+            user.getAgency().setActive(true);
+            agencyRepository.save(user.getAgency());
+        }
 
         // Marque le token comme utilisé
         token.setValidatedAt(LocalDateTime.now());
@@ -132,7 +184,7 @@ public class AuthenticationService {
             AuthenticationRequest request,
             String ipAddress,
             String userAgent
-    ) throws MessagingException {
+    ) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -145,8 +197,12 @@ public class AuthenticationService {
                 .orElseThrow();
 
         // Détection nouveau appareil/IP (comme Google)
-        if (isNewDevice(user, ipAddress, userAgent)) {
-            sendNewDeviceEmail(user, ipAddress, userAgent);
+        try {
+            if (isNewDevice(user, ipAddress, userAgent)) {
+                sendNewDeviceEmail(user, ipAddress, userAgent);
+            }
+        } catch (Exception ignored) {
+            // Ne pas bloquer la connexion si l'email de notification échoue
         }
 
         // Met à jour le dernier IP et userAgent connus
@@ -311,7 +367,7 @@ public class AuthenticationService {
      * Comparaison IP + UserAgent comme Google.
      */
     private boolean isNewDevice(User user, String ipAddress, String userAgent) {
-        if (user.getLastKnownIp() == null) return false;
+        if (user.getLastKnownIp() == null || user.getLastKnownUserAgent() == null) return false;
         return !user.getLastKnownIp().equals(ipAddress) ||
                 !user.getLastKnownUserAgent().equals(userAgent);
     }

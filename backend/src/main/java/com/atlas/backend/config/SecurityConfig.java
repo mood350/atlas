@@ -36,7 +36,7 @@ public class SecurityConfig {
      * cors:
      *   allowed-origins: http://localhost:4200,https://app.agencycrm.com
      */
-    @Value("${cors.allowed-origins: http://localhost:4200}")
+    @Value("${cors.allowed-origins: http://localhost:3000}")
     private String allowedOriginsRaw;
 
     // ─── Routes publiques ─────────────────────────────────────────────────────

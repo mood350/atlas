@@ -1,26 +1,347 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
+/* ───────────────────────────────────────────────────────────────
+   Tailwind theme bridge
+   Maps every CSS variable below to a Tailwind utility token, e.g.
+   --color-background → bg-background, text-background, border-background.
+   ─────────────────────────────────────────────────────────────── */
 @theme inline {
+  /* shadcn baseline */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* AtlasCRM surface extensions */
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-background-soft: var(--background-soft);
+  --color-background-muted: var(--background-muted);
+
+  /* Foreground variants */
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-foreground-on-dark: var(--foreground-on-dark);
+
+  /* Borders */
+  --color-border-soft: var(--border-soft);
+  --color-border-focus: var(--border-focus);
+
+  /* Status */
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-active-border: var(--sidebar-active-border);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Landing tiles */
+  --color-tile-light: var(--tile-light);
+  --color-tile-parchment: var(--tile-parchment);
+  --color-tile-dark: var(--tile-dark);
+  --color-tile-dark-2: var(--tile-dark-2);
+
+  /* Charts (Recharts) */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Fonts — SF Pro on Apple OSes, Inter elsewhere via next/font */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+
+  /* Radii — anchored to --radius */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Product shadow — sole shadow in the system, used only on product imagery */
+  --shadow-product: 0 3px 30px 5px rgba(0, 0, 0, 0.22);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ───────────────────────────────────────────────────────────────
+   LIGHT MODE
+   ─────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --background:            #ffffff;
+  --foreground:            #1d1d1f;
+  --card:                  #ffffff;
+  --card-foreground:       #1d1d1f;
+  --popover:               #ffffff;
+  --popover-foreground:    #1d1d1f;
+
+  --primary:               #0066cc;
+  --primary-foreground:    #ffffff;
+  --secondary:             #f5f5f7;
+  --secondary-foreground:  #1d1d1f;
+  --muted:                 #f5f5f7;
+  --muted-foreground:      #6e6e73;
+  --accent:                #e8f0fb;
+  --accent-foreground:     #0066cc;
+  --destructive:           #ff3b30;
+  --destructive-foreground:#ffffff;
+
+  --border:                #d2d2d7;
+  --input:                 #d2d2d7;
+  --ring:                  #0066cc;
+
+  /* Surfaces */
+  --surface:               #ffffff;
+  --surface-elevated:      #ffffff;
+  --background-soft:       #f5f5f7;
+  --background-muted:      #e8e8ed;
+
+  /* Text variants */
+  --foreground-muted:      #6e6e73;
+  --foreground-subtle:     #a1a1a6;
+  --foreground-on-dark:    #f5f5f7;
+
+  /* Borders */
+  --border-soft:           rgba(0, 0, 0, 0.08);
+  --border-focus:          #0066cc;
+
+  /* Status */
+  --success:               #34c759;
+  --success-bg:            #f0fdf4;
+  --warning:               #ff9f0a;
+  --warning-bg:            #fffbeb;
+  --danger:                #ff3b30;
+  --danger-bg:             #fff1f0;
+  --info:                  #0066cc;
+  --info-bg:               #eff6ff;
+
+  /* Sidebar */
+  --sidebar:                     #f5f5f7;
+  --sidebar-foreground:          #1d1d1f;
+  --sidebar-hover:               #e8e8ed;
+  --sidebar-active:              #e8f0fb;
+  --sidebar-active-foreground:   #0066cc;
+  --sidebar-active-border:       #0066cc;
+  --sidebar-border:              #d2d2d7;
+  --sidebar-primary:             #0066cc;
+  --sidebar-primary-foreground:  #ffffff;
+  --sidebar-accent:              #e8f0fb;
+  --sidebar-accent-foreground:   #0066cc;
+  --sidebar-ring:                #0066cc;
+
+  /* Landing tiles */
+  --tile-light:            #ffffff;
+  --tile-parchment:        #f5f5f7;
+  --tile-dark:             #1a1a2e;
+  --tile-dark-2:           #16213e;
+
+  /* Charts */
+  --chart-1: #0066cc;
+  --chart-2: #34c759;
+  --chart-3: #ff9f0a;
+  --chart-4: #af52de;
+  --chart-5: #ff3b30;
+
+  --radius: 0.625rem;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   DARK MODE
+   ─────────────────────────────────────────────────────────────── */
+.dark,
+[data-theme="dark"] {
+  --background:            #111113;
+  --foreground:            #f5f5f7;
+  --card:                  #1c1c1e;
+  --card-foreground:       #f5f5f7;
+  --popover:               #1c1c1e;
+  --popover-foreground:    #f5f5f7;
+
+  --primary:               #2997ff;
+  --primary-foreground:    #ffffff;
+  --secondary:             #1c1c1e;
+  --secondary-foreground:  #f5f5f7;
+  --muted:                 #2c2c2e;
+  --muted-foreground:      #a1a1a6;
+  --accent:                rgba(41, 151, 255, 0.12);
+  --accent-foreground:     #2997ff;
+  --destructive:           #ff453a;
+  --destructive-foreground:#ffffff;
+
+  --border:                #3a3a3c;
+  --input:                 #3a3a3c;
+  --ring:                  #2997ff;
+
+  /* Surfaces */
+  --surface:               #1c1c1e;
+  --surface-elevated:      #2c2c2e;
+  --background-soft:       #1c1c1e;
+  --background-muted:      #2c2c2e;
+
+  /* Text variants */
+  --foreground-muted:      #a1a1a6;
+  --foreground-subtle:     #6e6e73;
+  --foreground-on-dark:    #f5f5f7;
+
+  /* Borders */
+  --border-soft:           rgba(255, 255, 255, 0.08);
+  --border-focus:          #2997ff;
+
+  /* Status */
+  --success:               #30d158;
+  --success-bg:            rgba(48, 209, 88, 0.12);
+  --warning:               #ffd60a;
+  --warning-bg:            rgba(255, 214, 10, 0.12);
+  --danger:                #ff453a;
+  --danger-bg:             rgba(255, 69, 58, 0.12);
+  --info:                  #2997ff;
+  --info-bg:               rgba(41, 151, 255, 0.12);
+
+  /* Sidebar — invert and brighten */
+  --sidebar:                     #1c1c1e;
+  --sidebar-foreground:          #f5f5f7;
+  --sidebar-hover:               #2c2c2e;
+  --sidebar-active:              rgba(41, 151, 255, 0.12);
+  --sidebar-active-foreground:   #2997ff;
+  --sidebar-active-border:       #2997ff;
+  --sidebar-border:              #3a3a3c;
+  --sidebar-primary:             #2997ff;
+  --sidebar-primary-foreground:  #ffffff;
+  --sidebar-accent:              rgba(41, 151, 255, 0.12);
+  --sidebar-accent-foreground:   #2997ff;
+  --sidebar-ring:                #2997ff;
+
+  /* Landing tiles inverted: "light" tile becomes near-black, "dark" becomes pure black */
+  --tile-light:            #1c1c1e;
+  --tile-parchment:        #111113;
+  --tile-dark:             #000000;
+  --tile-dark-2:           #0a0a0c;
+
+  /* Charts — slightly brighter on dark */
+  --chart-1: #2997ff;
+  --chart-2: #30d158;
+  --chart-3: #ffd60a;
+  --chart-4: #bf5af2;
+  --chart-5: #ff453a;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Base layer
+   ─────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  /* No global transition — `next-themes` handles the theme-switch flash
+     via disableTransitionOnChange, and base-ui complains when CSS
+     transitions and CSS animations both apply to the same element
+     (e.g. on Accordion panels). Components add their own transitions
+     locally where needed. */
+
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ───────────────────────────────────────────────────────────────
+   AtlasCRM typography utilities — Apple-tight
+   ─────────────────────────────────────────────────────────────── */
+@layer components {
+  .hero-title {
+    font-size: 56px;
+    font-weight: 600;
+    letter-spacing: -0.28px;
+    line-height: 1.07;
+  }
+  .section-title {
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.10;
+  }
+  .card-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.14;
+  }
+  .lead-21 {
+    font-size: 21px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.38;
+  }
+  .body-17 {
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: -0.374px;
+    line-height: 1.47;
+  }
+  .caption-14 {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: -0.224px;
+    line-height: 1.43;
+  }
+
+  /* Responsive hero step-down — matches Apple's breakpoints */
+  @media (max-width: 1068px) {
+    .hero-title { font-size: 48px; }
+    .section-title { font-size: 36px; }
+  }
+  @media (max-width: 640px) {
+    .hero-title { font-size: 34px; }
+    .section-title { font-size: 28px; }
+    .card-title { font-size: 22px; }
+    .lead-21 { font-size: 18px; }
+  }
+  @media (max-width: 419px) {
+    .hero-title { font-size: 28px; }
+  }
 }

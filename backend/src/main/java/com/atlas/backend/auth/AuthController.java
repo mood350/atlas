@@ -34,7 +34,7 @@ public class AuthController {
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody @Valid AuthenticationRequest request,
             HttpServletRequest httpRequest
-    ) throws MessagingException {
+    ) {
         String ip = httpRequest.getRemoteAddr();
         String userAgent = httpRequest.getHeader("User-Agent");
         return ResponseEntity.ok(authService.authenticate(request, ip, userAgent));
