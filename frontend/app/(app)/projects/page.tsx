@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderKanban, MoreHorizontal, Trash2 } from "lucide-react";
+import { FolderKanban, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -195,8 +195,9 @@ export default function ProjectsPage() {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-1">
-        {statusTabs.map((tab) => (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1">
+          {statusTabs.map((tab) => (
           <button
             key={tab.label}
             onClick={() => { setStatusFilter(tab.value); setPage(0); }}
@@ -210,6 +211,15 @@ export default function ProjectsPage() {
             {tab.label}
           </button>
         ))}
+        </div>
+
+        <button
+          onClick={() => router.push("/projects/new")}
+          className="flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-background hover:opacity-90 transition-opacity active:scale-95"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Nouveau projet
+        </button>
       </div>
 
       <DataTable

@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   CheckCircle,
   Download,
+  FolderKanban,
   Loader2,
   Pencil,
   Send,
@@ -107,6 +108,7 @@ export default function ContractDetailPage({
   const isSentAlready = contract.status !== "DRAFT";
   const canEdit = contract.status === "DRAFT";
   const canCancel = contract.status !== "CANCELLED" && contract.status !== "SIGNED";
+  const canCreateProject = contract.status === "SIGNED";
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -136,6 +138,20 @@ export default function ContractDetailPage({
         </div>
 
         <div className="flex items-center gap-2">
+          {canCreateProject ? (
+            <Button
+              onClick={() =>
+                router.push(
+                  `/projects/new?contractId=${contract.id}&clientId=${contract.clientId}`,
+                )
+              }
+              className="rounded-full active:scale-95 transition-transform"
+            >
+              <FolderKanban className="mr-2 h-4 w-4" />
+              Créer un projet
+            </Button>
+          ) : null}
+
           {canEdit ? (
             <Button
               variant="outline"
