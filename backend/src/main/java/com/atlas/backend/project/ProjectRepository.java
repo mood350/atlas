@@ -17,6 +17,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Optional<Project> findByIdAndAgencyId(Long id, Long agencyId);
 
+    Optional<Project> findByAccessToken(String accessToken);
+
+    Optional<Project> findFirstByContractId(Long contractId);
+
     Page<Project> findByAgencyId(Long agencyId, Pageable pageable);
 
     Page<Project> findByAgencyIdAndStatus(Long agencyId, Project.ProjectStatus status, Pageable pageable);

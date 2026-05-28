@@ -468,6 +468,7 @@ export interface Project {
   completedAt?: string;
   createdAt: string;
   lastModifiedDate?: string;
+  accessToken?: string;
 }
 
 export interface ProjectStats {

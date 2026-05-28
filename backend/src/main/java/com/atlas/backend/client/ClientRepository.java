@@ -18,6 +18,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Page<Client> findAllByAgencyId(Long agencyId, Pageable pageable);
 
+    boolean existsByNameIgnoreCaseAndAgencyId(String name, Long agencyId);
+
     Optional<Client> findByIdAndAgencyId(Long id, Long agencyId);
 
     List<Client> findByAgencyIdAndStatus(Long agencyId, Client.ClientStatus status);

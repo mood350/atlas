@@ -55,6 +55,8 @@ public class ContractDto {
         private boolean expired;
         private LocalDateTime createdAt;
         private LocalDateTime lastModifiedDate;
+
+        private String projectAccessToken;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

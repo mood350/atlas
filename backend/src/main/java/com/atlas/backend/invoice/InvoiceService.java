@@ -47,8 +47,8 @@ public class InvoiceService {
     @Value("${application.mail.from}")
     private String from;
 
-    @Value("${application.mailing.frontend.activation-url}")
-    private String frontendUrl;
+    @Value("${application.mailing.frontend.base-url}")
+    private String frontendBaseUrl;
 
     // ─── Creer ───────────────────────────────────────────────────────────────
 
@@ -203,7 +203,7 @@ public class InvoiceService {
 
         invoicePdfService.generateInvoicePdf(invoice);
 
-        String portalUrl = frontendUrl + "/portal/invoices/" + invoice.getAccessToken();
+        String portalUrl = frontendBaseUrl + "/portal/invoices/" + invoice.getAccessToken();
         Map<String, Object> props = new HashMap<>();
         props.put("clientName",     invoice.getClient().getName());
         props.put("agencyName",     invoice.getAgency().getName());
@@ -417,7 +417,7 @@ public class InvoiceService {
 
     private void sendOverdueReminder(Invoice invoice) throws MessagingException {
         long daysOverdue = ChronoUnit.DAYS.between(invoice.getDueDate(), LocalDate.now());
-        String portalUrl = frontendUrl + "/portal/invoices/" + invoice.getAccessToken();
+        String portalUrl = frontendBaseUrl + "/portal/invoices/" + invoice.getAccessToken();
 
         Map<String, Object> props = new HashMap<>();
         props.put("clientName",    invoice.getClient().getName());

@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -55,6 +56,9 @@ public class Project extends Listeners {
 
     @Column(name = "project_number", unique = true, nullable = false, updatable = false)
     private String projectNumber;
+
+    @Column(name = "access_token", unique = true, nullable = false, updatable = false)
+    private String accessToken;
 
     @Column(nullable = false)
     private String name;

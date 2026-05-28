@@ -5,6 +5,7 @@ import {
   FileSignature,
   FileText,
   FolderKanban,
+  Globe,
   HelpCircle,
   Kanban,
   LayoutDashboard,
@@ -28,6 +29,7 @@ const primaryNav = [
   { href: "/invoices", icon: Receipt, label: "Factures" },
   { href: "/projects", icon: FolderKanban, label: "Projets" },
   { href: "/appointments", icon: Calendar, label: "Rendez-vous" },
+  { href: "/prospection", icon: Globe, label: "Prospection" },
 ] as const;
 
 const secondaryNav = [

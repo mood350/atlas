@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Circle,
+  ExternalLink,
   Loader2,
   MoreHorizontal,
   Pencil,
@@ -270,6 +271,18 @@ export default function ProjectDetailPage({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {project.accessToken ? (
+            <a
+              href={`/portal/projects/${project.accessToken}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-[13px] font-medium text-foreground hover:bg-background-muted active:scale-95 transition-all"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Portail client
+            </a>
+          ) : null}
 
           <Button
             variant="outline"

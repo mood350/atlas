@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KanbanBoard } from "@/components/app/crm/KanbanBoard";
+import { DealsListView } from "@/components/app/crm/DealsListView";
 import { PipelineHeader, type DealFilter, type ViewMode } from "@/components/app/crm/PipelineHeader";
 import { NewDealDialog } from "@/components/app/crm/NewDealDialog";
 import { AddStageDialog } from "@/components/app/crm/AddStageDialog";
@@ -245,19 +246,11 @@ export default function PipelinePage() {
 
         {!kanbanQuery.isLoading &&
         !kanbanQuery.isError &&
-        view === "list" ? (
-          <EmptyState
-            title="Vue liste — bientôt"
-            description="La vue tableau arrive en Phase 4. Pour l'instant, utilisez le Kanban."
-            action={
-              <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => setView("kanban")}
-              >
-                Revenir au Kanban
-              </Button>
-            }
+        view === "list" &&
+        activePipelineId ? (
+          <DealsListView
+            columns={filteredColumns}
+            onSelectDeal={setSelectedDeal}
           />
         ) : null}
       </div>

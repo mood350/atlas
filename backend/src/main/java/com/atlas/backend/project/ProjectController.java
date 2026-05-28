@@ -188,4 +188,13 @@ public class ProjectController {
         projectService.deleteMilestone(agencyId, projectId, milestoneId);
         return ResponseEntity.noContent().build();
     }
+
+    // ════════════════════════════════════════════════════════════════
+    //  PORTAIL CLIENT — /api/portal/projects/**  (public, token UUID)
+    // ════════════════════════════════════════════════════════════════
+
+    @GetMapping("/api/portal/projects/{token}")
+    public ResponseEntity<ProjectDto.Response> viewProject(@PathVariable String token) {
+        return ResponseEntity.ok(projectService.findByToken(token));
+    }
 }

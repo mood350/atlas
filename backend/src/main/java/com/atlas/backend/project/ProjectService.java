@@ -7,10 +7,14 @@ import com.atlas.backend.client.ClientRepository;
 import com.atlas.backend.common.exception.ResourceNotFoundException;
 import com.atlas.backend.contract.Contract;
 import com.atlas.backend.contract.ContractRepository;
+import com.atlas.backend.email.EmailService;
+import com.atlas.backend.email.EmailTemplateName;
 import com.atlas.backend.user.User;
 import com.atlas.backend.user.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -36,6 +41,13 @@ public class ProjectService {
     private final ClientRepository           clientRepository;
     private final ContractRepository         contractRepository;
     private final UserRepository             userRepository;
+    private final EmailService               emailService;
+
+    @Value("${application.mail.from}")
+    private String from;
+
+    @Value("${application.mailing.frontend.base-url}")
+    private String frontendBaseUrl;
 
     // ════════════════════════════════════════════════════════════════
     //  PROJETS
@@ -62,6 +74,7 @@ public class ProjectService {
                 .contract(contract)
                 .createdBy(currentUser)
                 .projectNumber(generateProjectNumber(agencyId))
+                .accessToken(UUID.randomUUID().toString())
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .priority(dto.getPriority() != null ? dto.getPriority() : Project.ProjectPriority.MEDIUM)
@@ -122,12 +135,54 @@ public class ProjectService {
         log.info("[PROJECT] Statut modifie project='{}' {}->{}",
                 project.getProjectNumber(), old, newStatus);
 
+        if (newStatus == Project.ProjectStatus.IN_PROGRESS
+                && old != Project.ProjectStatus.IN_PROGRESS
+                && project.getAccessToken() != null) {
+            sendProjectStartedEmail(project);
+        }
+
         return projectMapper.toResponse(saved);
+    }
+
+    private void sendProjectStartedEmail(Project project) {
+        String clientEmail = project.getClient().getEmail();
+        if (clientEmail == null || clientEmail.isBlank()) return;
+
+        String portalUrl = frontendBaseUrl + "/portal/projects/" + project.getAccessToken();
+        java.util.Map<String, Object> props = new java.util.HashMap<>();
+        props.put("clientName",    project.getClient().fullContactName());
+        props.put("agencyName",    project.getAgency().getName());
+        props.put("projectNumber", project.getProjectNumber());
+        props.put("projectName",   project.getName());
+        props.put("deadline",      project.getDeadline() != null ? project.getDeadline().toString() : "");
+        props.put("portalUrl",     portalUrl);
+
+        try {
+            emailService.sendEmail(
+                    clientEmail,
+                    "Votre projet a démarré — " + project.getName(),
+                    EmailTemplateName.PROJECT_STARTED,
+                    props,
+                    from
+            );
+            log.info("[PROJECT] Email démarrage envoyé client='{}' project='{}'",
+                    clientEmail, project.getProjectNumber());
+        } catch (MessagingException e) {
+            log.error("[PROJECT] Echec envoi email démarrage project='{}': {}",
+                    project.getProjectNumber(), e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
     public ProjectDto.Response findById(Long agencyId, Long projectId) {
         return projectMapper.toResponse(getProjectSecure(agencyId, projectId));
+    }
+
+    @Transactional(readOnly = true)
+    public ProjectDto.Response findByToken(String token) {
+        Project project = projectRepository.findByAccessToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Projet introuvable ou lien invalide"));
+        return projectMapper.toResponse(project);
     }
 
     @Transactional(readOnly = true)

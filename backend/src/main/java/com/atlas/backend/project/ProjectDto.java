@@ -135,6 +135,7 @@ public class ProjectDto {
     public static class Response {
         private Long   id;
         private String projectNumber;
+        private String accessToken;
         private String name;
         private String description;
 

@@ -11,6 +11,7 @@ public class ProjectMapper {
         return ProjectDto.Response.builder()
                 .id(project.getId())
                 .projectNumber(project.getProjectNumber())
+                .accessToken(project.getAccessToken())
                 .name(project.getName())
                 .description(project.getDescription())
                 .clientId(project.getClient().getId())

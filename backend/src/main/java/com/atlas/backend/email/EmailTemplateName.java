@@ -37,6 +37,9 @@ public enum EmailTemplateName {
     // Variables : clientName, invoiceNumber, paidAmount, currency, remainingAmount, paidAt
     PAYMENT_CONFIRMED("payment_confirmed"),
 
+    // Variables : clientName, agencyName, projectNumber, projectName, deadline, portalUrl
+    PROJECT_STARTED("project_started"),
+
     // Variables : guestName, memberName, startTime, meetingUrl, accessToken
     APPOINTMENT_CONFIRMATION("appointment_confirmation"),
 

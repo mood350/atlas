@@ -64,6 +64,8 @@ public class SecurityConfig {
             "/api/client-portal/**",
             "/api/portal/contracts/**",
             "/api/portal/invoices/**",
+            "/api/portal/quotes/**",
+            "/api/portal/projects/**",
             // Booking public (page Calendly-like, sans authentification)
             "/api/booking/**",
             // Callback OAuth2 Google Calendar

@@ -7,6 +7,7 @@ import com.atlas.backend.client.ClientRepository;
 import com.atlas.backend.common.exception.ResourceNotFoundException;
 import com.atlas.backend.email.EmailService;
 import com.atlas.backend.email.EmailTemplateName;
+import com.atlas.backend.project.ProjectRepository;
 import com.atlas.backend.quote.Quote;
 import com.atlas.backend.quote.QuoteRepository;
 import com.atlas.backend.user.User;
@@ -37,13 +38,14 @@ public class ContractService {
     private final AgencyRepository   agencyRepository;
     private final ClientRepository   clientRepository;
     private final QuoteRepository    quoteRepository;
+    private final ProjectRepository  projectRepository;
     private final EmailService       emailService;
 
     @Value("${application.mail.from}")
     private String from;
 
-    @Value("${application.mailing.frontend.activation-url}")
-    private String frontendUrl;
+    @Value("${application.mailing.frontend.base-url}")
+    private String frontendBaseUrl;
 
     // ─── Creer ───────────────────────────────────────────────────────────────
 
@@ -141,7 +143,7 @@ public class ContractService {
 
         contractPdfService.generateContractPdf(contract);
 
-        String portalUrl = frontendUrl + "/portal/contracts/" + contract.getAccessToken();
+        String portalUrl = frontendBaseUrl + "/portal/contracts/" + contract.getAccessToken();
         Map<String, Object> props = new HashMap<>();
         props.put("clientName",      contract.getClient().getName());
         props.put("agencyName",      contract.getAgency().getName());
@@ -247,7 +249,10 @@ public class ContractService {
     public ContractDto.Response findByToken(String accessToken) {
         Contract contract = contractRepository.findByAccessToken(accessToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Contrat introuvable"));
-        return contractMapper.toResponse(contract);
+        ContractDto.Response response = contractMapper.toResponse(contract);
+        projectRepository.findFirstByContractId(contract.getId())
+                .ifPresent(p -> response.setProjectAccessToken(p.getAccessToken()));
+        return response;
     }
 
     @Transactional(readOnly = true)

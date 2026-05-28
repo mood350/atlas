@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { CheckCircle, Loader2, ShieldCheck } from "lucide-react";
+import { CheckCircle, FolderKanban, Loader2, ShieldCheck } from "lucide-react";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
@@ -16,6 +16,7 @@ interface ContractPortal {
   validUntil?: string;
   signedAt?: string;
   signerName?: string;
+  projectAccessToken?: string;
 }
 
 function formatDate(iso: string) {
@@ -128,6 +129,15 @@ export default function ContractSignPage({
                 </>
               ) : null}
             </p>
+          ) : null}
+          {contract.projectAccessToken ? (
+            <a
+              href={`/portal/projects/${contract.projectAccessToken}`}
+              className="mt-4 flex items-center justify-center gap-2 rounded-full border border-[#e4e4e7] px-4 py-2.5 text-[14px] font-medium text-[#18181b] hover:bg-[#f4f4f5] transition-colors"
+            >
+              <FolderKanban className="h-4 w-4" />
+              Suivre l&apos;avancement du projet
+            </a>
           ) : null}
           <div className="mt-6 flex items-center justify-center gap-2 text-[12px] text-[#a1a1aa]">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -253,6 +263,21 @@ export default function ContractSignPage({
             </button>
           </form>
         </div>
+
+        {contract.projectAccessToken ? (
+          <div className="rounded-2xl bg-white p-5 shadow-sm text-center">
+            <p className="mb-3 text-[14px] text-[#3f3f46]">
+              Un projet est associé à ce contrat.
+            </p>
+            <a
+              href={`/portal/projects/${contract.projectAccessToken}`}
+              className="inline-flex items-center gap-2 rounded-full bg-[#18181b] px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity"
+            >
+              <FolderKanban className="h-4 w-4" />
+              Suivre l&apos;avancement du projet
+            </a>
+          </div>
+        ) : null}
 
         <p className="text-center text-[12px] text-[#a1a1aa]">
           © 2025 AtlasCRM · Signature électronique sécurisée
