@@ -257,12 +257,14 @@ export default function ProjectDetailPage({
         <div className="flex items-center gap-2">
           {/* Changer statut */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="rounded-full text-[13px]" disabled={updateStatus.isPending}>
-                {updateStatus.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                Statut
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" className="rounded-full text-[13px]" disabled={updateStatus.isPending}>
+                  {updateStatus.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+                  Statut
+                </Button>
+              }
+            />
             <DropdownMenuContent align="end">
               {projectStatusOptions.filter((o) => o.value !== project.status).map((o) => (
                 <DropdownMenuItem key={o.value} onClick={() => handleStatusChange(o.value)}>
