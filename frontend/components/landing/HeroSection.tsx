@@ -30,7 +30,7 @@ export function HeroSection() {
       <div className="mx-auto max-w-5xl text-center">
         <span className="hero-tag inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-3 py-1 text-[12px] font-medium text-foreground-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
-          Disponible aujourd&apos;hui · Mobile Money intégré
+          Disponible bientôt
         </span>
 
         <h1 className="hero-title mt-6 max-w-4xl text-balance text-foreground mx-auto">
